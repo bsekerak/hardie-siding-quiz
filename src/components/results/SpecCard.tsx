@@ -63,6 +63,11 @@ export function SpecCard({ spec }: { spec: ProductSpec }) {
         />
         <SpecRow label="Trim" value={spec.trim} note={spec.trimRationale} />
         <SpecRow
+          label="Gutters"
+          value={spec.gutters.label}
+          note={`${spec.gutters.detail} ${spec.gutters.rationale}`}
+        />
+        <SpecRow
           label="Install method"
           value={spec.installMethod}
           note={spec.installRationale}

@@ -70,30 +70,6 @@ export function PlanActions({ plan, answers, paletteIndex }: PlanActionsProps) {
       </p>
 
       <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <a
-          href="https://www.jameshardie.com/order-samples"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-3 rounded-xl border border-stone-200 bg-stone-50 p-4 transition-colors hover:border-hardie-300"
-        >
-          <Icon name="Palette" className="h-5 w-5 shrink-0 text-hardie-700" />
-          <span>
-            <span className="block text-sm font-bold text-slateCharcoal">Order samples</span>
-            <span className="block text-[12px] text-slateCharcoal-muted">jameshardie.com</span>
-          </span>
-        </a>
-        <a
-          href="https://www.jameshardie.com/find-a-contractor"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-3 rounded-xl border border-stone-200 bg-stone-50 p-4 transition-colors hover:border-hardie-300"
-        >
-          <Icon name="Hammer" className="h-5 w-5 shrink-0 text-hardie-700" />
-          <span>
-            <span className="block text-sm font-bold text-slateCharcoal">Find a preferred pro</span>
-            <span className="block text-[12px] text-slateCharcoal-muted">Contractor locator</span>
-          </span>
-        </a>
         <button
           type="button"
           onClick={() => void share()}

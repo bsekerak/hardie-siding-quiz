@@ -45,6 +45,10 @@ export function planToText(plan: SidingPlan, answers: QuizAnswers, paletteIndex 
   lines.push(`Finish          : ColorPlus(R) Technology factory finish`);
   lines.push(`Trim            : ${plan.spec.trim}`);
   lines.push(`Install method  : ${plan.spec.installMethod}`);
+  lines.push(`Gutters         : ${plan.spec.gutters.label}`);
+  if (plan.spec.gutters.downspout) {
+    lines.push(`Downspouts      : ${plan.spec.gutters.downspout}`);
+  }
   lines.push("");
   lines.push("Water management requirements:");
   plan.spec.waterManagement.forEach((item) => lines.push(`  * ${item}`));
@@ -99,7 +103,7 @@ export function planToText(plan: SidingPlan, answers: QuizAnswers, paletteIndex 
   lines.push(`Home built: ${answers.homeAge ?? "n/a"} | Current siding: ${answers.currentSiding ?? "n/a"}`);
   lines.push(`Style: ${answers.archStyle ?? "n/a"} | Height: ${answers.height ?? "n/a"} | Scope: ${answers.scope ?? "n/a"}`);
   lines.push(`Priorities: ${answers.priorities.join(", ") || "n/a"}`);
-  lines.push(`Staying: ${answers.timeline ?? "n/a"} | Installer: ${answers.installer ?? "n/a"}`);
+  lines.push(`Staying: ${answers.timeline ?? "n/a"} | Installer: ${answers.installer ?? "n/a"} | Gutters: ${answers.gutters ?? "n/a"}`);
   lines.push("");
   lines.push(rule);
   lines.push(

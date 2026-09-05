@@ -11,6 +11,7 @@ import {
   CURRENT_SIDING_OPTIONS,
   HEIGHT_OPTIONS,
   HOA_OPTIONS,
+  GUTTER_OPTIONS,
   HOME_AGE_OPTIONS,
   INSTALLER_OPTIONS,
   MASONRY_OPTIONS,
@@ -189,6 +190,43 @@ export function QuestionRenderer({ question, onAutoAdvance }: QuestionRendererPr
               New ColorPlus® next to weathered siding will not match, and the gap widens over the
               first two seasons. Specify a transition trim board at the boundary so the change reads
               as intentional architecture rather than a patch.
+            </Callout>
+          ) : null}
+        </div>
+      );
+
+    case "gutters":
+      return (
+        <div className="space-y-5">
+          <OptionGrid
+            name={question.title}
+            options={GUTTER_OPTIONS}
+            value={answers.gutters}
+            onSelect={(value) => {
+              setAnswer("gutters", value);
+              onAutoAdvance();
+            }}
+            columns={2}
+          />
+          {answers.gutters === "4-inch" && answers.height === "three-plus" ? (
+            <Callout tone="warn" title='A 4" trough may undersize a roof this large'>
+              Taller homes usually carry more roof area feeding each downspout. In a heavy downpour a
+              4&quot; gutter overshoots at the valleys, which puts water exactly where you just paid
+              to keep it out. Worth pricing the 6&quot; alongside it.
+            </Callout>
+          ) : null}
+          {answers.gutters === "skip" ? (
+            <Callout tone="info" title="They still come off and go back on">
+              Gutters have to be removed for the siding to go on. Confirm whether that labor sits
+              inside your contractor&apos;s number or gets billed separately — it&apos;s a common
+              surprise on a final invoice.
+            </Callout>
+          ) : null}
+          {answers.gutters === "6-inch" ? (
+            <Callout tone="info" title="Good time to size up">
+              A 6&quot; trough carries roughly 40% more water than a 5&quot;, and the 3&quot; x 4&quot;
+              downspout clogs far less with leaf litter. Since the gutters are already coming down,
+              the incremental cost is mostly material.
             </Callout>
           ) : null}
         </div>

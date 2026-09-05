@@ -1,5 +1,6 @@
 import type {
   ArchStyle,
+  GutterChoice,
   ChoiceOption,
   CostPreference,
   CurrentSiding,
@@ -118,6 +119,33 @@ export const SCOPE_OPTIONS: ReadonlyArray<ChoiceOption<Scope>> = [
   { value: "damaged-area", label: "Damaged area only" },
 ];
 
+export const GUTTER_OPTIONS: ReadonlyArray<ChoiceOption<GutterChoice>> = [
+  {
+    value: "6-inch",
+    label: '6" oversized gutters',
+    description: "Handles heavy rain, large roof planes and steep pitches without overshooting",
+    icon: "CloudHail",
+  },
+  {
+    value: "4-inch",
+    label: '4" gutters',
+    description: "Lower profile and less visually heavy — best on small or simple roofs",
+    icon: "Ruler",
+  },
+  {
+    value: "reuse",
+    label: "Re-hang my existing gutters",
+    description: "They still have to come down and go back up — that's labor, not free",
+    icon: "RotateCcw",
+  },
+  {
+    value: "skip",
+    label: "Not handling gutters in this project",
+    description: "We'll leave them out of your budget entirely",
+    icon: "X",
+  },
+];
+
 /* --------------------------------- Block C ---------------------------------- */
 
 export const PRIORITY_OPTIONS: ReadonlyArray<ChoiceOption<Priority>> = [
@@ -209,10 +237,14 @@ export const VIBE_CONTRAST_OPTIONS: ReadonlyArray<ChoiceOption<VibeContrast>> = 
 
 /* -------------------------------- Question set ------------------------------- */
 
-export const QUESTIONS: readonly QuestionMeta[] = [
+/**
+ * Question order is the single source of truth for numbering — `number` is
+ * derived from position below, so inserting a question can never leave two
+ * steps sharing a number.
+ */
+const QUESTION_DEFS: ReadonlyArray<Omit<QuestionMeta, "number">> = [
   {
     id: "stage",
-    number: 1,
     block: "A",
     blockLabel: "Where you are",
     kind: "single",
@@ -221,7 +253,6 @@ export const QUESTIONS: readonly QuestionMeta[] = [
   },
   {
     id: "symptoms",
-    number: 2,
     block: "A",
     blockLabel: "Where you are",
     kind: "multi",
@@ -231,7 +262,6 @@ export const QUESTIONS: readonly QuestionMeta[] = [
   },
   {
     id: "zip",
-    number: 3,
     block: "B",
     blockLabel: "Your house",
     kind: "zip",
@@ -240,7 +270,6 @@ export const QUESTIONS: readonly QuestionMeta[] = [
   },
   {
     id: "homeAge",
-    number: 4,
     block: "B",
     blockLabel: "Your house",
     kind: "single",
@@ -249,7 +278,6 @@ export const QUESTIONS: readonly QuestionMeta[] = [
   },
   {
     id: "currentSiding",
-    number: 5,
     block: "B",
     blockLabel: "Your house",
     kind: "single",
@@ -258,7 +286,6 @@ export const QUESTIONS: readonly QuestionMeta[] = [
   },
   {
     id: "archStyle",
-    number: 6,
     block: "B",
     blockLabel: "Your house",
     kind: "single",
@@ -267,7 +294,6 @@ export const QUESTIONS: readonly QuestionMeta[] = [
   },
   {
     id: "sizeScope",
-    number: 7,
     block: "B",
     blockLabel: "Your house",
     kind: "compound",
@@ -275,8 +301,16 @@ export const QUESTIONS: readonly QuestionMeta[] = [
     helper: "Height drives staging and labor; scope drives the material quantity.",
   },
   {
+    id: "gutters",
+    block: "B",
+    blockLabel: "Your house",
+    kind: "single",
+    title: "What about gutters?",
+    helper:
+      "Your gutters have to come off for the siding to go on. Replacing them now costs a fraction of doing it as its own job later.",
+  },
+  {
     id: "priorities",
-    number: 8,
     block: "C",
     blockLabel: "Your priorities",
     kind: "multi",
@@ -287,7 +321,6 @@ export const QUESTIONS: readonly QuestionMeta[] = [
   },
   {
     id: "timeline",
-    number: 9,
     block: "C",
     blockLabel: "Your priorities",
     kind: "single",
@@ -296,7 +329,6 @@ export const QUESTIONS: readonly QuestionMeta[] = [
   },
   {
     id: "installer",
-    number: 10,
     block: "C",
     blockLabel: "Your priorities",
     kind: "single",
@@ -305,7 +337,6 @@ export const QUESTIONS: readonly QuestionMeta[] = [
   },
   {
     id: "costPreference",
-    number: 11,
     block: "C",
     blockLabel: "Your priorities",
     kind: "single",
@@ -314,7 +345,6 @@ export const QUESTIONS: readonly QuestionMeta[] = [
   },
   {
     id: "features",
-    number: 12,
     block: "D",
     blockLabel: "Your color strategy",
     kind: "compound",
@@ -323,7 +353,6 @@ export const QUESTIONS: readonly QuestionMeta[] = [
   },
   {
     id: "hoa",
-    number: 13,
     block: "D",
     blockLabel: "Your color strategy",
     kind: "single",
@@ -332,7 +361,6 @@ export const QUESTIONS: readonly QuestionMeta[] = [
   },
   {
     id: "vibe",
-    number: 14,
     block: "D",
     blockLabel: "Your color strategy",
     kind: "ab-pairs",
@@ -340,6 +368,11 @@ export const QUESTIONS: readonly QuestionMeta[] = [
     helper: "Three quick either/or choices. Go with your gut.",
   },
 ];
+
+export const QUESTIONS: readonly QuestionMeta[] = QUESTION_DEFS.map((definition, index) => ({
+  ...definition,
+  number: index + 1,
+}));
 
 export function questionByNumber(number: number): QuestionMeta | undefined {
   return QUESTIONS.find((q) => q.number === number);

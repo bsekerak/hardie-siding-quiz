@@ -53,6 +53,12 @@ export type Height = "single" | "two" | "three-plus";
 
 export type Scope = "whole-house" | "one-two-sides" | "damaged-area";
 
+/**
+ * Gutters have to come down for a re-side regardless, so the real choice is
+ * whether they go back up or get replaced while the wall is open.
+ */
+export type GutterChoice = "reuse" | "4-inch" | "6-inch" | "skip";
+
 /* ---------------------------------- Block C --------------------------------- */
 
 export type Priority =
@@ -97,6 +103,7 @@ export interface QuizAnswers {
   /** Q6 */ archStyle: ArchStyle | null;
   /** Q7a */ height: Height | null;
   /** Q7b */ scope: Scope | null;
+  /** Q8 */ gutters: GutterChoice | null;
   /** Q8 */ priorities: Priority[];
   /** Q9 */ timeline: Timeline | null;
   /** Q10 */ installer: Installer | null;
@@ -182,6 +189,15 @@ export interface SidingProfile {
   costHigh: number;
 }
 
+export interface GutterSpec {
+  choice: GutterChoice;
+  label: string;
+  detail: string;
+  rationale: string;
+  downspout: string | null;
+  linearFeet: number;
+}
+
 export interface ProductSpec {
   primary: SidingProfile;
   accent: SidingProfile | null;
@@ -194,6 +210,7 @@ export interface ProductSpec {
   installMethod: string;
   installRationale: string;
   waterManagement: string[];
+  gutters: GutterSpec;
 }
 
 /* ---------------------------------- Color ----------------------------------- */

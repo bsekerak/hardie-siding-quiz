@@ -9,6 +9,7 @@ import {
   MASONRY_OPTIONS,
   PRIORITY_OPTIONS,
   ROOF_TONE_OPTIONS,
+  GUTTER_OPTIONS,
   SCOPE_OPTIONS,
   STAGE_OPTIONS,
   SYMPTOM_OPTIONS,
@@ -30,7 +31,7 @@ import type { ChoiceOption, QuizAnswers } from "@/types/quiz";
 
 const FIELD_SEPARATOR = "~";
 const LIST_SEPARATOR = ".";
-const VERSION = "1";
+const VERSION = "2";
 
 function valueSet<T extends string>(options: ReadonlyArray<ChoiceOption<T>>): ReadonlySet<string> {
   return new Set(options.map((option) => option.value));
@@ -44,6 +45,7 @@ const SETS = {
   archStyle: valueSet(ARCH_STYLE_OPTIONS),
   height: valueSet(HEIGHT_OPTIONS),
   scope: valueSet(SCOPE_OPTIONS),
+  gutters: valueSet(GUTTER_OPTIONS),
   priorities: valueSet(PRIORITY_OPTIONS),
   timeline: valueSet(TIMELINE_OPTIONS),
   installer: valueSet(INSTALLER_OPTIONS),
@@ -83,6 +85,7 @@ export function encodePlan(answers: QuizAnswers, paletteIndex: number): string {
     answers.archStyle ?? "",
     answers.height ?? "",
     answers.scope ?? "",
+    answers.gutters ?? "",
     answers.priorities.join(LIST_SEPARATOR),
     answers.timeline ?? "",
     answers.installer ?? "",
@@ -135,22 +138,23 @@ export function decodePlan(code: string): SharedPlan | null {
     archStyle: single(parts[6], SETS.archStyle) as QuizAnswers["archStyle"],
     height: single(parts[7], SETS.height) as QuizAnswers["height"],
     scope: single(parts[8], SETS.scope) as QuizAnswers["scope"],
-    priorities: multi(parts[9], SETS.priorities) as QuizAnswers["priorities"],
-    timeline: single(parts[10], SETS.timeline) as QuizAnswers["timeline"],
-    installer: single(parts[11], SETS.installer) as QuizAnswers["installer"],
-    costPreference: single(parts[12], SETS.costPreference) as QuizAnswers["costPreference"],
-    roofTone: single(parts[13], SETS.roofTone) as QuizAnswers["roofTone"],
-    masonry: single(parts[14], SETS.masonry) as QuizAnswers["masonry"],
-    windowTrim: single(parts[15], SETS.windowTrim) as QuizAnswers["windowTrim"],
-    hoa: single(parts[16], SETS.hoa) as QuizAnswers["hoa"],
-    vibeBrightness: single(parts[17], SETS.vibeBrightness) as QuizAnswers["vibeBrightness"],
-    vibeTemperature: single(parts[18], SETS.vibeTemperature) as QuizAnswers["vibeTemperature"],
-    vibeContrast: single(parts[19], SETS.vibeContrast) as QuizAnswers["vibeContrast"],
+    gutters: single(parts[9], SETS.gutters) as QuizAnswers["gutters"],
+    priorities: multi(parts[10], SETS.priorities) as QuizAnswers["priorities"],
+    timeline: single(parts[11], SETS.timeline) as QuizAnswers["timeline"],
+    installer: single(parts[12], SETS.installer) as QuizAnswers["installer"],
+    costPreference: single(parts[13], SETS.costPreference) as QuizAnswers["costPreference"],
+    roofTone: single(parts[14], SETS.roofTone) as QuizAnswers["roofTone"],
+    masonry: single(parts[15], SETS.masonry) as QuizAnswers["masonry"],
+    windowTrim: single(parts[16], SETS.windowTrim) as QuizAnswers["windowTrim"],
+    hoa: single(parts[17], SETS.hoa) as QuizAnswers["hoa"],
+    vibeBrightness: single(parts[18], SETS.vibeBrightness) as QuizAnswers["vibeBrightness"],
+    vibeTemperature: single(parts[19], SETS.vibeTemperature) as QuizAnswers["vibeTemperature"],
+    vibeContrast: single(parts[20], SETS.vibeContrast) as QuizAnswers["vibeContrast"],
   };
 
   if (!isQuizComplete(answers)) return null;
 
-  const parsedIndex = Number.parseInt(parts[20] ?? "0", 10);
+  const parsedIndex = Number.parseInt(parts[21] ?? "0", 10);
   const paletteIndex = Number.isFinite(parsedIndex) && parsedIndex >= 0 && parsedIndex <= 2
     ? parsedIndex
     : 0;

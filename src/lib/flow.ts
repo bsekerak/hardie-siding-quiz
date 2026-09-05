@@ -36,6 +36,8 @@ export function isStepAnswered(question: QuestionMeta, answers: QuizAnswers): bo
       return answers.archStyle !== null;
     case "sizeScope":
       return answers.height !== null && answers.scope !== null;
+    case "gutters":
+      return answers.gutters !== null;
     case "priorities":
       return answers.priorities.length >= 1;
     case "timeline":

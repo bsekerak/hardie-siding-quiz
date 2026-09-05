@@ -26,6 +26,7 @@ export const EMPTY_ANSWERS: QuizAnswers = {
   archStyle: null,
   height: null,
   scope: null,
+  gutters: null,
   priorities: [],
   timeline: null,
   installer: null,

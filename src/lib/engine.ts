@@ -10,6 +10,7 @@ import {
 import type {
   AuditItem,
   ClimateProfile,
+  GutterSpec,
   ContractorQuestion,
   CostEstimate,
   CostLineItem,
@@ -179,6 +180,78 @@ function wantsSmooth(answers: QuizAnswers): boolean {
   );
 }
 
+/** Eave length tracks roofline, not wall area, so it gets its own base table. */
+const BASE_GUTTER_LF: Readonly<Record<NonNullable<QuizAnswers["height"]>, number>> = {
+  single: 170,
+  two: 190,
+  "three-plus": 230,
+};
+
+const GUTTER_SCOPE_FACTOR: Readonly<Record<NonNullable<QuizAnswers["scope"]>, number>> = {
+  "whole-house": 1,
+  "one-two-sides": 0.5,
+  "damaged-area": 0.25,
+};
+
+export function estimateGutterFeet(answers: QuizAnswers): number {
+  const height = answers.height ?? "two";
+  const scope = answers.scope ?? "whole-house";
+  return roundTo(BASE_GUTTER_LF[height] * GUTTER_SCOPE_FACTOR[scope], 10);
+}
+
+function buildGutterSpec(answers: QuizAnswers, climate: ClimateProfile): GutterSpec {
+  const choice = answers.gutters ?? "reuse";
+  const linearFeet = choice === "skip" ? 0 : estimateGutterFeet(answers);
+  // Oversized gutters earn their cost on big roof planes, steep pitches and
+  // regions that get their rain in short heavy bursts.
+  const wantsOversize =
+    answers.height === "three-plus" || climate.hailCorridor || climate.zone === "HZ10";
+
+  switch (choice) {
+    case "6-inch":
+      return {
+        choice,
+        label: '6" K-style aluminum gutter, seamless',
+        detail: `Approximately ${linearFeet} linear feet with 3" x 4" downspouts.`,
+        rationale:
+          'A 6" trough carries roughly 40% more water than a 5" and nearly double a 4", and the larger 3" x 4" downspout is far less prone to clogging with leaf litter. On a re-side this is the moment to size up — the gutters are already coming down.',
+        downspout: '3" x 4" downspouts, discharging a minimum of 4 feet from the foundation',
+        linearFeet,
+      };
+    case "4-inch":
+      return {
+        choice,
+        label: '4" K-style aluminum gutter, seamless',
+        detail: `Approximately ${linearFeet} linear feet with 2" x 3" downspouts.`,
+        rationale: wantsOversize
+          ? `A 4" trough keeps the fascia line light, but your roof and climate push real volume — in a heavy downpour a 4" gutter will overshoot at the valleys. Worth pricing the 6" alongside it before you commit.`
+          : 'A 4" trough suits a small, simple roof with short runs, and it keeps the fascia line visually light against the new siding.',
+        downspout: '2" x 3" downspouts, discharging a minimum of 4 feet from the foundation',
+        linearFeet,
+      };
+    case "skip":
+      return {
+        choice,
+        label: "No gutter work in this project",
+        detail: "Excluded from your budget below.",
+        rationale:
+          "Worth knowing: your gutters still have to come off for the siding to go on and be re-hung afterward. Confirm with your contractor whether that labor is inside their number or billed separately — it is a common source of a surprise line on the final invoice.",
+        downspout: null,
+        linearFeet: 0,
+      };
+    default:
+      return {
+        choice: "reuse",
+        label: "Remove and re-hang existing gutters",
+        detail: `Approximately ${linearFeet} linear feet taken down and reinstalled.`,
+        rationale:
+          "Re-hanging is cheaper than replacing, but it is not free — and aluminum that has been taken down once often shows dents and drilled fascia holes when it goes back up. Ask to inspect them on the ground before they are reinstalled.",
+        downspout: "Existing downspouts re-hung; replace any that are dented or undersized",
+        linearFeet,
+      };
+  }
+}
+
 export function buildProductSpec(answers: QuizAnswers, climate: ClimateProfile): ProductSpec {
   const style = answers.archStyle ?? "ranch";
   const mapping = STYLE_MATRIX[style];
@@ -250,6 +323,7 @@ export function buildProductSpec(answers: QuizAnswers, climate: ClimateProfile):
     installMethod,
     installRationale,
     waterManagement,
+    gutters: buildGutterSpec(answers, climate),
   };
 }
 
@@ -586,6 +660,26 @@ export function buildCostEstimate(
       detail:
         "Cutting fiber cement generates respirable crystalline silica. You need a HardieBlade™-style polycrystalline blade, a dust-collecting saw shroud with a HEPA vacuum, and an N95 minimum. This is a genuine health requirement, not a comfort item.",
       oftenHidden: false,
+    });
+  }
+
+  if (spec.gutters.choice !== "skip") {
+    const perFootLow = spec.gutters.choice === "6-inch" ? 9 : spec.gutters.choice === "4-inch" ? 6 : 2.5;
+    const perFootHigh = spec.gutters.choice === "6-inch" ? 18 : spec.gutters.choice === "4-inch" ? 12 : 5;
+    lineItems.push({
+      id: "gutters",
+      label:
+        spec.gutters.choice === "reuse"
+          ? "Gutters — remove & re-hang existing"
+          : `Gutters — new ${spec.gutters.choice === "6-inch" ? '6"' : '4"'} seamless aluminum`,
+      low: roundTo(spec.gutters.linearFeet * perFootLow, 50),
+      high: roundTo(spec.gutters.linearFeet * perFootHigh, 50),
+      detail: `${spec.gutters.detail} ${
+        spec.gutters.choice === "reuse"
+          ? "Removal and reinstallation labor only — no new material."
+          : "Includes downspouts, hangers and disposal of the old run."
+      }`,
+      oftenHidden: true,
     });
   }
 

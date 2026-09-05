@@ -8,7 +8,7 @@ import { QuestionRenderer } from "@/components/quiz/QuestionRenderer";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { useQuiz } from "@/context/QuizContext";
-import { isStepAnswered } from "@/lib/flow";
+import { TOTAL_QUESTION_COUNT, isStepAnswered } from "@/lib/flow";
 
 const AUTO_ADVANCE_MS = 260;
 
@@ -128,7 +128,7 @@ export function QuizEngine() {
             className="mt-8"
             aria-labelledby="question-title"
           >
-            <p className="eyebrow">Question {currentQuestion.number} of 14</p>
+            <p className="eyebrow">Question {currentQuestion.number} of {TOTAL_QUESTION_COUNT}</p>
             <h1
               id="question-title"
               className="mt-2 text-[26px] font-extrabold leading-tight tracking-tight text-hardie-800 sm:text-[32px]"

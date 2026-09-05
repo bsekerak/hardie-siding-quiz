@@ -10,6 +10,7 @@ import { ContractorSheet } from "@/components/results/ContractorSheet";
 import { CostPanel } from "@/components/results/CostPanel";
 import { PaletteGrid } from "@/components/results/PaletteGrid";
 import { PlanActions } from "@/components/results/PlanActions";
+import { PlanResources } from "@/components/results/PlanResources";
 import { PrintSummary } from "@/components/results/PrintSummary";
 import { SpecCard } from "@/components/results/SpecCard";
 import { StageBanner } from "@/components/results/StageBanner";
@@ -153,6 +154,7 @@ export function ResultsDashboard() {
         <CostPanel cost={plan.cost} costPreference={answers.costPreference} />
         <AuditChecklist items={plan.audit} />
         <ContractorSheet questions={plan.contractorQuestions} />
+        <PlanResources plan={plan} answers={answers} />
         <PlanActions plan={plan} answers={answers} paletteIndex={paletteIndex} />
       </div>
     </motion.div>
