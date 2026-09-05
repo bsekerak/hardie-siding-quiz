@@ -1,0 +1,25 @@
+import { ButtonLink } from "@/components/ui/Button";
+import { Icon } from "@/components/ui/Icon";
+
+export default function NotFound() {
+  return (
+    <div className="container-page py-24 text-center">
+      <p className="eyebrow">404</p>
+      <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-hardie-800">
+        That page isn&apos;t part of the guide
+      </h1>
+      <p className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-slateCharcoal-muted">
+        Head back to the start, or jump straight into the questions.
+      </p>
+      <div className="mt-7 flex flex-wrap justify-center gap-3">
+        <ButtonLink href="/" variant="secondary">
+          Back home
+        </ButtonLink>
+        <ButtonLink href="/quiz">
+          Start your siding plan
+          <Icon name="ArrowRight" className="h-4 w-4" />
+        </ButtonLink>
+      </div>
+    </div>
+  );
+}
