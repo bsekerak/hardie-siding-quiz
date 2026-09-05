@@ -60,12 +60,12 @@ const ANSWERS: ReadonlyArray<{ question: string; body: string }> = [
 export default function HomePage() {
   return (
     <>
-      <section className="border-b border-stone-200 bg-gradient-to-b from-white to-stone-100">
+      <section className="border-b border-stone-300 bg-white">
         <div className="container-page py-16 sm:py-24">
           <div className="max-w-3xl">
             <ResumeBanner />
             <p className="eyebrow">Siding Journey Guide & Product Selector</p>
-            <h1 className="mt-3 text-4xl font-extrabold leading-[1.08] tracking-tight text-hardie-800 sm:text-[56px]">
+            <h1 className="mt-4 text-40p font-bold text-slateCharcoal sm:text-48p">
               Stop guessing at siding. Get an engineered specification.
             </h1>
             <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slateCharcoal-light">
@@ -85,14 +85,11 @@ export default function HomePage() {
               </span>
             </div>
 
-            <dl className="mt-12 grid gap-4 sm:grid-cols-3">
+            <dl className="mt-14 grid gap-8 sm:grid-cols-3">
               {BADGES.map((badge) => (
-                <div key={badge.title} className="rounded-xl border border-stone-200 bg-white p-5">
-                  <Icon name={badge.icon} className="h-5 w-5 text-hardie-700" />
-                  <dt className="mt-3 text-sm font-bold leading-snug text-slateCharcoal">
-                    {badge.title}
-                  </dt>
-                  <dd className="mt-1.5 text-[13px] leading-relaxed text-slateCharcoal-muted">
+                <div key={badge.title} className="border-t-2 border-hardie-500 pt-4">
+                  <dt className="text-16p font-bold text-slateCharcoal">{badge.title}</dt>
+                  <dd className="mt-2 text-[13px] leading-relaxed text-slateCharcoal-light">
                     {badge.body}
                   </dd>
                 </div>
@@ -107,39 +104,34 @@ export default function HomePage() {
         <h2 className="mt-2 max-w-2xl text-3xl font-extrabold tracking-tight text-hardie-800 sm:text-4xl">
           Three blocks of questions, one specification
         </h2>
-        <ol className="mt-10 grid gap-5 lg:grid-cols-3">
+        <ol className="mt-12 grid gap-px bg-stone-300 lg:grid-cols-3">
           {STEPS.map((step, index) => (
-            <li key={step.title} className="card p-6">
-              <div className="flex items-center gap-3">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-hardie-700 text-white">
-                  <Icon name={step.icon} className="h-[18px] w-[18px]" />
-                </span>
-                <span className="text-xs font-bold uppercase tracking-[0.14em] text-slateCharcoal-muted">
-                  Step {index + 1}
-                </span>
-              </div>
-              <h3 className="mt-4 text-lg font-extrabold leading-snug text-hardie-800">
-                {step.title}
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-slateCharcoal-muted">{step.body}</p>
+            <li key={step.title} className="bg-stone-100 px-6 py-8">
+              <span className="text-40p font-bold leading-none text-hardie-500">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <h3 className="mt-5 text-20p font-bold text-slateCharcoal">{step.title}</h3>
+              <p className="mt-2.5 text-[14px] leading-relaxed text-slateCharcoal-light">
+                {step.body}
+              </p>
             </li>
           ))}
         </ol>
       </section>
 
-      <section className="border-y border-stone-200 bg-white">
+      <section className="border-y border-stone-300 bg-white">
         <div className="container-page py-16 sm:py-20">
           <p className="eyebrow">The questions nobody asks until it&apos;s expensive</p>
-          <h2 className="mt-2 max-w-2xl text-3xl font-extrabold tracking-tight text-hardie-800 sm:text-4xl">
+          <h2 className="mt-2 max-w-2xl text-32p font-bold text-slateCharcoal sm:text-40p">
             We answer these before you sign anything
           </h2>
-          <div className="mt-10 grid gap-5 sm:grid-cols-2">
+          <div className="mt-12 grid gap-x-12 gap-y-10 sm:grid-cols-2">
             {ANSWERS.map((item) => (
-              <div key={item.question} className="rounded-xl bg-stone-100 p-6">
-                <h3 className="text-[15px] font-extrabold leading-snug text-slateCharcoal">
+              <div key={item.question} className="border-t border-stone-300 pt-5">
+                <h3 className="text-20p font-bold text-slateCharcoal">
                   &ldquo;{item.question}&rdquo;
                 </h3>
-                <p className="mt-2.5 text-sm leading-relaxed text-slateCharcoal-muted">
+                <p className="mt-2.5 text-[14px] leading-relaxed text-slateCharcoal-light">
                   {item.body}
                 </p>
               </div>
@@ -149,8 +141,8 @@ export default function HomePage() {
       </section>
 
       <section className="container-page py-16 sm:py-20">
-        <div className="rounded-2xl bg-hardie-700 p-8 text-white sm:p-12">
-          <h2 className="max-w-2xl text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">
+        <div className="bg-hardie-800 px-8 py-14 text-white sm:px-14">
+          <h2 className="max-w-2xl text-32p font-bold sm:text-40p">
             Your climate already chose half your specification. Let&apos;s find out what it picked.
           </h2>
           <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-hardie-100">

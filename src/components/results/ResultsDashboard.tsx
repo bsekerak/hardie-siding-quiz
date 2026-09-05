@@ -25,9 +25,9 @@ function LoadingState() {
   return (
     <div className="container-page py-12">
       <div className="mx-auto max-w-5xl animate-pulse space-y-6">
-        <div className="h-48 rounded-2xl bg-stone-200" />
-        <div className="h-40 rounded-2xl bg-stone-200" />
-        <div className="h-64 rounded-2xl bg-stone-200" />
+        <div className="h-48 rounded bg-stone-200" />
+        <div className="h-40 rounded bg-stone-200" />
+        <div className="h-64 rounded bg-stone-200" />
       </div>
     </div>
   );
@@ -37,7 +37,7 @@ function IncompleteState() {
   return (
     <div className="container-page py-20">
       <div className="mx-auto max-w-xl text-center">
-        <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-hardie-700 text-white">
+        <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-sm bg-hardie-500 text-white">
           <Icon name="ClipboardCheck" className="h-7 w-7" />
         </span>
         <h1 className="mt-6 text-3xl font-extrabold tracking-tight text-hardie-800">
@@ -118,7 +118,7 @@ export function ResultsDashboard() {
         <PrintSummary plan={plan} palette={selectedPalette} />
 
         {shared ? (
-          <div data-print-hide className="rounded-2xl border border-hardie-200 bg-hardie-50 p-5">
+          <div data-print-hide className="rounded border border-hardie-200 bg-hardie-50 p-5">
             <p className="text-sm font-bold text-hardie-800">You&apos;re viewing a shared plan</p>
             <p className="mt-1.5 text-[13px] leading-relaxed text-hardie-700">
               This specification was built from someone else&apos;s answers. Your own saved session

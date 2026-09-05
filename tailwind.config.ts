@@ -30,23 +30,29 @@ const config: Config = {
           500: "#00833e",
           600: "#007035",
           700: "#005C2C",
-          800: "#00401F",
+          800: "#163C20",
           900: "#002A14",
         },
         // Named for the roles the components already use, remapped to JH ink.
+        // JH's neutral ramp: text #333, muted #555, rules #DDD / #EEE.
         slateCharcoal: {
-          DEFAULT: "#262627",
-          light: "#4A4A4D",
-          muted: "#6B6B70",
-          deep: "#23263B",
+          DEFAULT: "#333333",
+          light: "#555555",
+          muted: "#6E6E6E",
+          deep: "#163C20",
         },
         stone: {
           DEFAULT: "#F6F5F3",
-          50: "#F9F8F7",
+          50: "#FBFAF9",
           100: "#F6F5F3",
-          200: "#EAEAEA",
-          300: "#D9D9D9",
-          400: "#B9B9BD",
+          200: "#EEEEEE",
+          300: "#DDDDDD",
+          400: "#B9B9B9",
+        },
+        // secondary-color-* on jameshardie.com
+        sand: {
+          DEFAULT: "#D4CCC4",
+          low: "#F6F5F3",
         },
         gold: {
           DEFAULT: "#EBAA6E",
@@ -69,9 +75,20 @@ const config: Config = {
           "sans-serif",
         ],
       },
+      // JH blocks are flat. "card" is intentionally near-invisible and kept only
+      // so overlays (modals) have something to lift with.
       boxShadow: {
-        card: "0 1px 2px rgba(38, 38, 39, 0.04), 0 8px 24px -12px rgba(38, 38, 39, 0.16)",
-        lifted: "0 2px 4px rgba(38, 38, 39, 0.06), 0 18px 40px -18px rgba(38, 38, 39, 0.3)",
+        card: "none",
+        lifted: "0 2px 4px rgba(51, 51, 51, 0.06), 0 18px 40px -18px rgba(51, 51, 51, 0.28)",
+      },
+      fontSize: {
+        "16p": ["1rem", { lineHeight: "1.375rem" }],
+        "20p": ["1.25rem", { lineHeight: "1.5rem" }],
+        "24p": ["1.5rem", { lineHeight: "1.75rem" }],
+        "28p": ["1.75rem", { lineHeight: "2rem" }],
+        "32p": ["2rem", { lineHeight: "2.25rem" }],
+        "40p": ["2.5rem", { lineHeight: "2.75rem" }],
+        "48p": ["3rem", { lineHeight: "3.25rem" }],
       },
       borderRadius: {
         xl2: "1.25rem",

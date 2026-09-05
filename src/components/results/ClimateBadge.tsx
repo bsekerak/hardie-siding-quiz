@@ -49,7 +49,7 @@ export function ClimateBadge({ climate }: ClimateBadgeProps) {
         </div>
       ) : null}
 
-      <ul className="mt-5 space-y-3 border-t border-stone-200 pt-5">
+      <ul className="mt-5 space-y-3 border-t border-stone-300 pt-5">
         {climate.drivers.map((driver) => (
           <li key={driver} className="flex gap-3 text-sm leading-relaxed text-slateCharcoal-light">
             <Icon name="Check" className="mt-0.5 h-4 w-4 shrink-0 text-hardie-600" />

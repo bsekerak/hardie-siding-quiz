@@ -36,9 +36,9 @@ export function ContractorSheet({ questions }: { questions: ContractorQuestion[]
 
       <ol className="space-y-4">
         {questions.map((item, index) => (
-          <li key={item.id} className="rounded-xl border border-stone-200 bg-stone-50 p-5">
+          <li key={item.id} className="bg-stone-100 p-6">
             <div className="flex gap-3.5">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-hardie-700 text-[13px] font-bold text-white">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-hardie-500 text-[13px] font-bold text-white">
                 {index + 1}
               </span>
               <div className="flex-1">

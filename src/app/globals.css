@@ -36,12 +36,24 @@
     @apply mx-auto w-full max-w-6xl px-5 sm:px-8;
   }
 
+  /* jameshardie.com blocks are flat: a tint or a hairline rule, 4px radius at
+     most, and no shadow. The lift comes from the section rhythm, not the box. */
   .card {
-    @apply rounded-2xl border border-stone-200 bg-white shadow-card;
+    @apply rounded border border-stone-300 bg-white;
+  }
+
+  .block-tint {
+    @apply rounded bg-stone-100;
   }
 
   .eyebrow {
-    @apply text-xs font-semibold uppercase tracking-[0.18em] text-hardie-500;
+    @apply text-xs font-bold uppercase tracking-[0.14em] text-hardie-600;
+  }
+
+  /* JH's link treatment: the title turns brand green and underlines. No border
+     colour change, no shadow, no scale. */
+  .jh-link-title {
+    @apply text-slateCharcoal transition-colors group-hover:text-hardie-500 group-hover:underline;
   }
 
   .prose-note {

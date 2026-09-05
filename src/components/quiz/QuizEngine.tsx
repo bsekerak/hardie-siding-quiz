@@ -75,7 +75,7 @@ export function QuizEngine() {
           <div className="h-4 w-1/2 rounded bg-stone-200" />
           <div className="grid gap-3 sm:grid-cols-2">
             {[0, 1, 2, 3, 4, 5].map((key) => (
-              <div key={key} className="h-24 rounded-xl bg-stone-200" />
+              <div key={key} className="h-24 rounded bg-stone-200" />
             ))}
           </div>
         </div>
@@ -96,8 +96,8 @@ export function QuizEngine() {
         />
 
         {restored ? (
-          <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-hardie-200 bg-hardie-50 px-4 py-3">
-            <p className="text-[13px] font-medium text-hardie-800">
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-l-2 border-hardie-500 bg-stone-100 px-4 py-3">
+            <p className="text-[13px] font-medium text-slateCharcoal">
               We picked up where you left off. Your answers are saved on this device.
             </p>
             <div className="flex gap-2">
@@ -131,7 +131,7 @@ export function QuizEngine() {
             <p className="eyebrow">Question {currentQuestion.number} of {TOTAL_QUESTION_COUNT}</p>
             <h1
               id="question-title"
-              className="mt-2 text-[26px] font-extrabold leading-tight tracking-tight text-hardie-800 sm:text-[32px]"
+              className="mt-2 text-28p font-bold text-slateCharcoal sm:text-40p"
             >
               {currentQuestion.title}
             </h1>
@@ -147,7 +147,7 @@ export function QuizEngine() {
           </motion.section>
         </AnimatePresence>
 
-        <div className="mt-10 flex items-center justify-between gap-4 border-t border-stone-200 pt-6">
+        <div className="mt-10 flex items-center justify-between gap-4 border-t border-stone-300 pt-6">
           <Button variant="ghost" onClick={handleBack} disabled={stepIndex === 0}>
             <Icon name="ArrowLeft" className="h-4 w-4" />
             Back

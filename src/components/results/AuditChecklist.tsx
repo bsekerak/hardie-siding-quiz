@@ -44,10 +44,10 @@ export function AuditChecklist({ items }: { items: AuditItem[] }) {
                 onClick={() => toggle(item.id)}
                 aria-pressed={isChecked}
                 className={cn(
-                  "flex w-full gap-3.5 rounded-xl border p-4 text-left transition-colors duration-150",
+                  "flex w-full gap-3.5 rounded border p-4 text-left transition-colors duration-150",
                   isChecked
-                    ? "border-hardie-300 bg-hardie-50"
-                    : "border-stone-200 bg-white hover:border-hardie-300",
+                    ? "border-stone-300 bg-hardie-50"
+                    : "border-stone-300 bg-white hover:border-slateCharcoal",
                 )}
               >
                 <span

@@ -37,33 +37,33 @@ export function OptionGrid<T extends string>({
             aria-checked={selected}
             onClick={() => onSelect(option.value)}
             className={cn(
-              "group flex w-full items-start gap-3 rounded-xl border p-4 text-left transition-all duration-150",
+              "group flex w-full items-start gap-3.5 rounded border p-4 text-left transition-colors duration-150",
               selected
-                ? "border-hardie-700 bg-hardie-50 shadow-card ring-1 ring-hardie-700"
-                : "border-stone-200 bg-white hover:border-hardie-300 hover:shadow-card",
+                ? "border-hardie-500 bg-hardie-50"
+                : "border-stone-300 bg-white hover:border-slateCharcoal",
             )}
           >
             {option.icon ? (
               <span
                 className={cn(
-                  "mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors",
-                  selected ? "bg-hardie-700 text-white" : "bg-stone-100 text-hardie-600",
+                  "mt-0.5 shrink-0 transition-colors",
+                  selected ? "text-hardie-500" : "text-slateCharcoal-light",
                 )}
               >
-                <Icon name={option.icon} className="h-[18px] w-[18px]" />
+                <Icon name={option.icon} className="h-5 w-5" />
               </span>
             ) : null}
             <span className="flex-1">
               <span
                 className={cn(
-                  "block text-[15px] font-semibold leading-snug",
-                  selected ? "text-hardie-800" : "text-slateCharcoal",
+                  "block text-16p font-bold",
+                  selected ? "text-hardie-600" : "text-slateCharcoal",
                 )}
               >
                 {option.label}
               </span>
               {option.description ? (
-                <span className="mt-1 block text-[13px] leading-relaxed text-slateCharcoal-muted">
+                <span className="mt-1.5 block text-[13px] leading-relaxed text-slateCharcoal-light">
                   {option.description}
                 </span>
               ) : null}
@@ -71,8 +71,8 @@ export function OptionGrid<T extends string>({
             <span
               aria-hidden="true"
               className={cn(
-                "mt-1 h-4 w-4 shrink-0 rounded-full border-2 transition-colors",
-                selected ? "border-hardie-700 bg-hardie-700 ring-2 ring-inset ring-white" : "border-stone-300",
+                "mt-1 h-4 w-4 shrink-0 rounded-full border transition-colors",
+                selected ? "border-hardie-500 bg-hardie-500 ring-2 ring-inset ring-white" : "border-stone-400",
               )}
             />
           </button>

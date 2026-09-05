@@ -9,19 +9,19 @@ interface StageBannerProps {
 
 export function StageBanner({ action, personaNote, diagnosis }: StageBannerProps) {
   return (
-    <section className="overflow-hidden rounded-2xl bg-hardie-700 text-white shadow-lifted">
+    <section className="bg-hardie-800 text-white">
       <div className="p-6 sm:p-9">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">
           Where you are right now
         </p>
-        <h2 className="mt-3 text-2xl font-extrabold leading-tight tracking-tight sm:text-[32px]">
+        <h2 className="mt-3 text-28p font-bold sm:text-40p">
           {action.headline}
         </h2>
         <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-hardie-100">
           {action.summary}
         </p>
 
-        <div className="mt-6 rounded-xl border border-gold/40 bg-hardie-800/60 p-5">
+        <div className="mt-7 border-l-2 border-gold bg-black/15 p-5">
           <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-gold">
             <Icon name="ArrowRight" className="h-4 w-4" />
             Your single next step
@@ -36,7 +36,7 @@ export function StageBanner({ action, personaNote, diagnosis }: StageBannerProps
             {action.supportingPoints.map((point) => (
               <li
                 key={point}
-                className="rounded-xl bg-hardie-800/50 p-4 text-[13px] leading-relaxed text-hardie-100"
+                className="border-t border-white/25 pt-4 text-[13px] leading-relaxed text-stone-200"
               >
                 {point}
               </li>
@@ -45,7 +45,7 @@ export function StageBanner({ action, personaNote, diagnosis }: StageBannerProps
         ) : null}
 
         {diagnosis ? (
-          <div className="mt-6 rounded-xl bg-white/95 p-5 text-slateCharcoal">
+          <div className="mt-7 bg-white p-6 text-slateCharcoal">
             <p className="eyebrow">What your symptoms indicate</p>
             <p className="mt-1.5 text-sm leading-relaxed">{diagnosis}</p>
           </div>

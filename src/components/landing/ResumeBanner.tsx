@@ -21,7 +21,7 @@ export function ResumeBanner() {
   return (
     <Link
       href={href}
-      className="mb-7 inline-flex items-center gap-2.5 rounded-full border border-gold/50 bg-gold/15 px-5 py-2.5 text-sm font-semibold text-hardie-800 transition-colors hover:bg-gold/25"
+      className="mb-7 inline-flex items-center gap-2.5 rounded-full border border-slateCharcoal bg-white px-5 py-2.5 text-sm font-semibold text-slateCharcoal transition-colors hover:bg-stone-100"
     >
       <Icon name="RotateCcw" className="h-4 w-4" />
       {label}

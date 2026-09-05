@@ -1,4 +1,5 @@
 import { SectionHeading } from "@/components/results/SectionHeading";
+import { ArrowOut } from "@/components/ui/ArrowOut";
 import { Icon } from "@/components/ui/Icon";
 import type { QuizAnswers, SidingPlan } from "@/types/quiz";
 
@@ -76,22 +77,14 @@ function ResourceCard({ link }: { link: ResourceLink }) {
       href={link.href}
       target="_blank"
       rel="noopener noreferrer"
-      className="group flex gap-3.5 rounded-xl border border-stone-200 bg-white p-5 transition-colors hover:border-hardie-400"
+      className="group flex flex-col bg-stone-100 px-6 pb-6 pt-6"
     >
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-hardie-50 text-hardie-700 transition-colors group-hover:bg-hardie-600 group-hover:text-white">
-        <Icon name={link.icon} className="h-[18px] w-[18px]" />
+      <span className="flex items-start justify-between gap-4">
+        <span className="jh-link-title text-16p font-bold md:text-20p">{link.title}</span>
+        <ArrowOut className="mt-0.5 h-5 w-5 shrink-0 text-slateCharcoal transition-colors group-hover:text-hardie-500" />
       </span>
-      <span className="flex-1">
-        <span className="flex items-center gap-1.5 text-[15px] font-bold leading-snug text-slateCharcoal">
-          {link.title}
-          <Icon
-            name="ArrowRight"
-            className="h-3.5 w-3.5 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
-          />
-        </span>
-        <span className="mt-1.5 block text-[13px] leading-relaxed text-slateCharcoal-muted">
-          {link.body}
-        </span>
+      <span className="mt-3 block text-[13px] leading-relaxed text-slateCharcoal-light">
+        {link.body}
       </span>
     </a>
   );
@@ -130,27 +123,26 @@ export function PlanResources({ plan, answers }: PlanResourcesProps) {
           href={featured.href}
           target="_blank"
           rel="noopener noreferrer"
-          className="group mb-4 flex flex-col gap-4 rounded-xl bg-hardie-700 p-6 text-white transition-colors hover:bg-hardie-800 sm:flex-row sm:items-center"
+          className="group mb-3 block bg-hardie-800 px-6 py-8 text-white sm:px-8"
         >
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/15">
-            <Icon name={featured.icon} className="h-6 w-6" />
-          </span>
-          <span className="flex-1">
-            <span className="flex items-center gap-2 text-lg font-extrabold leading-snug">
-              {featured.title}
-              <Icon name="ArrowRight" className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          <span className="flex items-start justify-between gap-6">
+            <span className="max-w-2xl">
+              <span className="block text-24p font-bold group-hover:underline sm:text-28p">
+                {featured.title}
+              </span>
+              <span className="mt-3 block text-[14px] leading-relaxed text-stone-200">
+                {featured.body}
+              </span>
+              <span className="mt-5 inline-block border-b-2 border-gold pb-1 text-[13px] font-bold uppercase tracking-[0.1em] text-gold">
+                Start with {plan.palettes[0]?.body.name ?? "your palette"}
+              </span>
             </span>
-            <span className="mt-1.5 block text-[13px] leading-relaxed text-hardie-100">
-              {featured.body}
-            </span>
-            <span className="mt-3 inline-block rounded-full bg-gold px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-hardie-900">
-              Try {plan.palettes[0]?.body.name ?? "your palette"} first
-            </span>
+            <ArrowOut className="h-6 w-6 shrink-0 text-white" />
           </span>
         </a>
       ) : null}
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-px bg-stone-300 sm:grid-cols-2">
         {[...rest, ...conditional].map((link) => (
           <ResourceCard key={link.href} link={link} />
         ))}
@@ -158,14 +150,14 @@ export function PlanResources({ plan, answers }: PlanResourcesProps) {
 
       <div className="mt-8 border-t border-stone-200 pt-6">
         <p className="eyebrow">Before the contractor visit</p>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <div className="mt-4 grid gap-px bg-stone-300 sm:grid-cols-2">
           {PREP_LINKS.map((link) => (
             <ResourceCard key={link.href} link={link} />
           ))}
         </div>
       </div>
 
-      <div className="mt-6 rounded-xl bg-stone-100 p-5">
+      <div className="mt-8 border-l-2 border-hardie-500 bg-stone-100 p-6">
         <p className="flex items-center gap-2 text-sm font-bold text-hardie-800">
           <Icon name="ClipboardCheck" className="h-4 w-4" />
           Walk into that visit with three things

@@ -41,7 +41,7 @@ export function CostPanel({ cost, costPreference }: CostPanelProps) {
       />
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-xl bg-hardie-700 p-6 text-white">
+        <div className="bg-hardie-800 p-6 text-white">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
             Total project range
           </p>
@@ -52,7 +52,7 @@ export function CostPanel({ cost, costPreference }: CostPanelProps) {
             Siding system, tear-off, contingencies and permits — everything below, added up.
           </p>
         </div>
-        <div className="rounded-xl border border-stone-200 bg-stone-50 p-6">
+        <div className="bg-stone-100 p-6">
           <p className="eyebrow">Estimated monthly</p>
           <p className="mt-2 text-3xl font-extrabold tracking-tight text-hardie-800 sm:text-4xl">
             {formatCurrency(cost.monthlyLow)} – {formatCurrency(cost.monthlyHigh)}
@@ -64,7 +64,7 @@ export function CostPanel({ cost, costPreference }: CostPanelProps) {
         </div>
       </div>
 
-      <div className="mt-6 rounded-xl border border-gold/40 bg-gold/10 p-5">
+      <div className="mt-6 border-l-2 border-gold bg-stone-100 p-5">
         <p className="text-sm font-bold text-slateCharcoal">{framing.title}</p>
         <p className="mt-1.5 text-[13px] leading-relaxed text-slateCharcoal-light">{framing.body}</p>
       </div>
@@ -73,7 +73,7 @@ export function CostPanel({ cost, costPreference }: CostPanelProps) {
         <table className="w-full min-w-[520px] border-collapse text-left">
           <caption className="sr-only">Estimated cost breakdown by line item</caption>
           <thead>
-            <tr className="border-b border-stone-200">
+            <tr className="border-b border-stone-300">
               <th className="pb-3 text-[11px] font-bold uppercase tracking-[0.1em] text-slateCharcoal-muted">
                 Line item
               </th>
@@ -83,7 +83,7 @@ export function CostPanel({ cost, costPreference }: CostPanelProps) {
             </tr>
           </thead>
           <tbody>
-            <tr className="border-b border-stone-200">
+            <tr className="border-b border-stone-300">
               <td className="py-4 pr-6">
                 <p className="text-sm font-semibold text-slateCharcoal">
                   Siding system, installed
@@ -97,7 +97,7 @@ export function CostPanel({ cost, costPreference }: CostPanelProps) {
               </td>
             </tr>
             {cost.lineItems.map((item) => (
-              <tr key={item.id} className="border-b border-stone-200">
+              <tr key={item.id} className="border-b border-stone-300">
                 <td className="py-4 pr-6">
                   <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-slateCharcoal">
                     {item.label}

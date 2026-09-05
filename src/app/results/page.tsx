@@ -13,9 +13,9 @@ function DashboardFallback() {
   return (
     <div className="container-page py-12">
       <div className="mx-auto max-w-5xl animate-pulse space-y-6">
-        <div className="h-48 rounded-2xl bg-stone-200" />
-        <div className="h-40 rounded-2xl bg-stone-200" />
-        <div className="h-64 rounded-2xl bg-stone-200" />
+        <div className="h-48 rounded bg-stone-200" />
+        <div className="h-40 rounded bg-stone-200" />
+        <div className="h-64 rounded bg-stone-200" />
       </div>
     </div>
   );

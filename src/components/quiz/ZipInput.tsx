@@ -37,7 +37,7 @@ export function ZipInput({ value, onChange, onSubmit }: ZipInputProps) {
           onKeyDown={(event) => {
             if (event.key === "Enter" && valid) onSubmit();
           }}
-          className="w-full rounded-xl border border-stone-200 bg-white py-4 pl-12 pr-4 text-lg font-semibold tracking-[0.12em] text-slateCharcoal placeholder:font-normal placeholder:tracking-normal placeholder:text-stone-400 focus:border-hardie-500"
+          className="w-full rounded border border-stone-300 bg-white py-4 pl-12 pr-4 text-lg font-semibold tracking-[0.12em] text-slateCharcoal placeholder:font-normal placeholder:tracking-normal placeholder:text-stone-400 focus:border-hardie-500"
         />
       </div>
       <p id="zip-help" className="mt-2 text-[13px] text-slateCharcoal-muted">
@@ -45,14 +45,14 @@ export function ZipInput({ value, onChange, onSubmit }: ZipInputProps) {
       </p>
 
       {preview ? (
-        <div className="mt-5 rounded-xl border border-hardie-200 bg-hardie-50 p-4">
+        <div className="mt-5 border-l-2 border-hardie-500 bg-stone-100 p-4">
           <p className="eyebrow">Derived from your ZIP</p>
-          <p className="mt-1.5 text-sm font-semibold text-hardie-800">
+          <p className="mt-1.5 text-16p font-bold text-slateCharcoal">
             {preview.zone}® product line — {preview.regionLabel}
           </p>
           <ul className="mt-2 space-y-1">
             {preview.drivers.slice(0, 2).map((driver) => (
-              <li key={driver} className="text-[13px] leading-relaxed text-hardie-700">
+              <li key={driver} className="text-[13px] leading-relaxed text-slateCharcoal-light">
                 {driver}
               </li>
             ))}

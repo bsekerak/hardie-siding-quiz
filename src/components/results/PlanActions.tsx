@@ -58,7 +58,7 @@ export function PlanActions({ plan, answers, paletteIndex }: PlanActionsProps) {
   return (
     <section
       data-print-hide
-      className="rounded-2xl border border-hardie-200 bg-white p-6 shadow-card sm:p-8"
+      className="rounded border border-hardie-200 bg-white p-6  sm:p-8"
     >
       <p className="eyebrow">What to do next</p>
       <h2 className="mt-1 text-xl font-extrabold tracking-tight text-hardie-800 sm:text-2xl">
@@ -73,7 +73,7 @@ export function PlanActions({ plan, answers, paletteIndex }: PlanActionsProps) {
         <button
           type="button"
           onClick={() => void share()}
-          className="flex items-center gap-3 rounded-xl border border-stone-200 bg-stone-50 p-4 text-left transition-colors hover:border-hardie-300"
+          className="flex items-center gap-3 bg-stone-100 p-5 text-left transition-colors hover:border-slateCharcoal"
         >
           <Icon name={shareState === "copied" ? "Check" : "Share2"} className="h-5 w-5 shrink-0 text-hardie-700" />
           <span>
@@ -88,7 +88,7 @@ export function PlanActions({ plan, answers, paletteIndex }: PlanActionsProps) {
         <button
           type="button"
           onClick={() => setModalOpen(true)}
-          className="flex items-center gap-3 rounded-xl border border-stone-200 bg-stone-50 p-4 text-left transition-colors hover:border-hardie-300"
+          className="flex items-center gap-3 bg-stone-100 p-5 text-left transition-colors hover:border-slateCharcoal"
         >
           <Icon name="Mail" className="h-5 w-5 shrink-0 text-hardie-700" />
           <span>
@@ -99,7 +99,7 @@ export function PlanActions({ plan, answers, paletteIndex }: PlanActionsProps) {
         <button
           type="button"
           onClick={retake}
-          className="flex items-center gap-3 rounded-xl border border-stone-200 bg-stone-50 p-4 text-left transition-colors hover:border-hardie-300"
+          className="flex items-center gap-3 bg-stone-100 p-5 text-left transition-colors hover:border-slateCharcoal"
         >
           <Icon name="RotateCcw" className="h-5 w-5 shrink-0 text-hardie-700" />
           <span>
@@ -109,7 +109,7 @@ export function PlanActions({ plan, answers, paletteIndex }: PlanActionsProps) {
         </button>
       </div>
 
-      <div className="mt-6 flex flex-wrap gap-3 border-t border-stone-200 pt-6">
+      <div className="mt-6 flex flex-wrap gap-3 border-t border-stone-300 pt-6">
         <Button variant="secondary" onClick={() => downloadPlan(plan, answers, paletteIndex)}>
           <Icon name="Download" className="h-4 w-4" />
           Download as text

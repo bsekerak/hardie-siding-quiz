@@ -10,7 +10,7 @@ interface SpecRowProps {
 
 function SpecRow({ label, value, note }: SpecRowProps) {
   return (
-    <div className="grid gap-1 border-b border-stone-200 py-4 last:border-0 sm:grid-cols-[180px_1fr] sm:gap-6">
+    <div className="grid gap-1 border-b border-stone-300 py-4 last:border-0 sm:grid-cols-[180px_1fr] sm:gap-6">
       <dt className="text-[13px] font-bold uppercase tracking-[0.08em] text-slateCharcoal-muted">
         {label}
       </dt>
@@ -74,7 +74,7 @@ export function SpecCard({ spec }: { spec: ProductSpec }) {
         />
       </dl>
 
-      <div className="mt-6 rounded-xl bg-stone-100 p-5">
+      <div className="mt-8 border-l-2 border-hardie-500 bg-stone-100 p-6">
         <p className="flex items-center gap-2 text-sm font-bold text-hardie-800">
           <Icon name="Wrench" className="h-4 w-4" />
           Water management — the part that decides whether this lasts 30 years

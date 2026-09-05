@@ -8,12 +8,12 @@ export function SiteHeader() {
         <Link href="/" className="flex items-center gap-3">
           <span
             aria-hidden="true"
-            className="flex h-9 w-9 items-center justify-center rounded-lg bg-hardie-700 text-sm font-extrabold text-white"
+            className="flex h-9 w-9 items-center justify-center rounded-sm bg-hardie-500 text-sm font-bold text-white"
           >
             JH
           </span>
           <span className="leading-tight">
-            <span className="block text-sm font-bold text-hardie-800">James Hardie</span>
+            <span className="block text-sm font-bold text-slateCharcoal">James Hardie</span>
             <span className="block text-[11px] font-medium uppercase tracking-[0.14em] text-slateCharcoal-muted">
               Siding Journey Guide
             </span>
