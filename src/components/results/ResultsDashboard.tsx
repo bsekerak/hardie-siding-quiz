@@ -1,13 +1,16 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useEffect, useMemo, useRef } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AuditChecklist } from "@/components/results/AuditChecklist";
 import { ClimateBadge } from "@/components/results/ClimateBadge";
 import { ContractorSheet } from "@/components/results/ContractorSheet";
 import { CostPanel } from "@/components/results/CostPanel";
 import { PaletteGrid } from "@/components/results/PaletteGrid";
 import { PlanActions } from "@/components/results/PlanActions";
+import { PrintSummary } from "@/components/results/PrintSummary";
 import { SpecCard } from "@/components/results/SpecCard";
 import { StageBanner } from "@/components/results/StageBanner";
 import { ButtonLink } from "@/components/ui/Button";
@@ -15,6 +18,7 @@ import { Icon } from "@/components/ui/Icon";
 import { useQuiz } from "@/context/QuizContext";
 import { celebratePlan } from "@/lib/celebrate";
 import { buildPlan } from "@/lib/engine";
+import { decodePlan } from "@/lib/share";
 
 function LoadingState() {
   return (
@@ -56,8 +60,25 @@ function IncompleteState() {
 const CELEBRATED_KEY = "hardie-siding-plan-celebrated";
 
 export function ResultsDashboard() {
-  const { answers, hydrated, complete } = useQuiz();
+  const { answers: ownAnswers, hydrated, complete: ownComplete } = useQuiz();
+  const searchParams = useSearchParams();
   const celebrated = useRef<boolean>(false);
+  const [paletteIndex, setPaletteIndex] = useState<number>(0);
+
+  // A ?plan= link carries a complete answer set, so a recipient sees the sender's
+  // plan without having taken the quiz — and without overwriting their own saved
+  // session, which stays untouched in localStorage.
+  const shared = useMemo(() => {
+    const code = searchParams.get("plan");
+    return code ? decodePlan(code) : null;
+  }, [searchParams]);
+
+  const answers = shared ? shared.answers : ownAnswers;
+  const complete = shared ? true : ownComplete;
+
+  useEffect(() => {
+    if (shared) setPaletteIndex(shared.paletteIndex);
+  }, [shared]);
 
   const plan = useMemo(() => (complete ? buildPlan(answers) : null), [answers, complete]);
 
@@ -82,6 +103,9 @@ export function ResultsDashboard() {
   if (!hydrated) return <LoadingState />;
   if (!plan) return <IncompleteState />;
 
+  const selectedPalette = plan.palettes[paletteIndex] ?? plan.palettes[0];
+  if (!selectedPalette) return <IncompleteState />;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -90,6 +114,19 @@ export function ResultsDashboard() {
       className="container-page py-10 sm:py-12"
     >
       <div className="mx-auto max-w-5xl space-y-6">
+        <PrintSummary plan={plan} palette={selectedPalette} />
+
+        {shared ? (
+          <div data-print-hide className="rounded-2xl border border-hardie-200 bg-hardie-50 p-5">
+            <p className="text-sm font-bold text-hardie-800">You&apos;re viewing a shared plan</p>
+            <p className="mt-1.5 text-[13px] leading-relaxed text-hardie-700">
+              This specification was built from someone else&apos;s answers. Your own saved session
+              is untouched — <ButtonLinkInline href="/quiz">build your own plan</ButtonLinkInline> to
+              get a spec for your house and climate.
+            </p>
+          </div>
+        ) : null}
+
         <header>
           <p className="eyebrow">Your Hardie siding plan</p>
           <h1 className="mt-1.5 text-3xl font-extrabold leading-tight tracking-tight text-hardie-800 sm:text-[40px]">
@@ -108,12 +145,24 @@ export function ResultsDashboard() {
         />
         <ClimateBadge climate={plan.climate} />
         <SpecCard spec={plan.spec} />
-        <PaletteGrid palettes={plan.palettes} />
+        <PaletteGrid
+          palettes={plan.palettes}
+          selectedIndex={paletteIndex}
+          onSelect={setPaletteIndex}
+        />
         <CostPanel cost={plan.cost} costPreference={answers.costPreference} />
         <AuditChecklist items={plan.audit} />
         <ContractorSheet questions={plan.contractorQuestions} />
-        <PlanActions plan={plan} answers={answers} />
+        <PlanActions plan={plan} answers={answers} paletteIndex={paletteIndex} />
       </div>
     </motion.div>
+  );
+}
+
+function ButtonLinkInline({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link href={href} className="font-semibold underline decoration-hardie-400 underline-offset-2">
+      {children}
+    </Link>
   );
 }

@@ -1,11 +1,13 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* jameshardie.com sets its type in Helvetica Now/Helvetica Pro (--font-helveticaPro
+   in their bundle). That face is licensed, so we name it first for anyone whose
+   machine has it and fall back through the Helvetica family it belongs to. */
 :root {
-  --font-inter: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-helvetica-pro: "Helvetica Now Text", "Helvetica Now Display", "Helvetica Neue",
+    Helvetica, Arial, sans-serif;
 }
 
 @layer base {
@@ -16,7 +18,7 @@
 
   body {
     @apply bg-stone-100 text-slateCharcoal antialiased;
-    font-family: var(--font-inter);
+    font-family: theme("fontFamily.sans");
   }
 
   /* A single consistent focus treatment across cards, chips and buttons. */
@@ -54,6 +56,10 @@
 }
 
 /* Homeowners print the results page and hand it to contractors. */
+.print-only {
+  display: none;
+}
+
 @media print {
   header,
   footer,
@@ -61,8 +67,25 @@
     display: none !important;
   }
 
+  .print-only {
+    display: block !important;
+  }
+
   body {
     background: #ffffff;
+  }
+
+  /* Browsers drop background colors when printing by default, which would send
+     a color specification to paper with every swatch blank. These regions are
+     the whole point of the printout, so force them to render. */
+  .print-exact,
+  .print-exact * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  @page {
+    margin: 14mm;
   }
 
   .card,

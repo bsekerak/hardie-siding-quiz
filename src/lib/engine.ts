@@ -34,15 +34,15 @@ export function buildDiagnosis(answers: QuizAnswers): string | null {
 
   const hasStructural = symptoms.some((s) => STRUCTURAL_SYMPTOMS.has(s));
   if (hasStructural) {
-    return "Soft spots or rot means water is already past the siding and into the sheathing. Spot repair covers the evidence without fixing the path — plan on full replacement plus a sheathing and rot contingency in the budget.";
+    return "Soft spots or rot mean water is already behind the siding, so this is a replacement rather than a patch — which is good news for your decision, because it means you get to choose the whole wall. Fiber cement is the direct answer to what failed: it doesn't rot, absorb water at the cut ends, or feed the mold that got you here. Budget a sheathing contingency and move on to picking the siding.";
   }
   if (symptoms.length >= 2) {
-    return "Two or more symptoms at once usually means the wall system is failing rather than one damaged area. Price full replacement and carry a sheathing/rot contingency, because more is typically found once the old siding is off.";
+    return "Two or more symptoms at once means the wall system is at the end of its life, not that one area got unlucky. Replace the field rather than chase repairs — and since you're re-cladding anyway, the profile and color below are a real design decision, not damage control.";
   }
   if (symptoms.includes("not-sure")) {
-    return "Before you price anything, get a moisture-probe inspection at the base of the walls and around the windows. What is found there decides whether this is a repair or a replacement.";
+    return "You don't need a diagnosis to know what you'd replace it with. The specification below is what fits your house and climate either way; the only thing an opened wall changes is whether you're doing every elevation now or one at a time.";
   }
-  return "One isolated symptom is the case where spot repair may genuinely be feasible. Have a contractor open a small area to confirm the sheathing is dry before you commit to a full re-side.";
+  return "One isolated symptom is the case where a spot repair can genuinely hold. If you'd rather not do this twice, the spec below is what a full replacement should look like — and matching a single elevation to it now keeps the option open to finish the rest later.";
 }
 
 /* --------------------------------- Persona ---------------------------------- */
@@ -69,95 +69,99 @@ const PERSONA_NOTES: Readonly<Record<Persona, string>> = {
 
 /* ------------------------------- Stage action -------------------------------- */
 
-export function buildStageAction(answers: QuizAnswers, climate: ClimateProfile): StageAction {
-  const stage = answers.stage;
-  switch (stage) {
+export function buildStageAction(
+  answers: QuizAnswers,
+  climate: ClimateProfile,
+  spec: ProductSpec,
+  palettes: Palette[],
+): StageAction {
+  // Naming the actual recommendation is the point of the tool. Every stage
+  // lands on a siding decision the homeowner can act on; condition and claim
+  // issues ride along as supporting notes rather than becoming the next step.
+  const lead = palettes[0];
+  const bodyName = lead ? lead.body.name : "your body color";
+  const trimName = lead ? lead.trim.name : "Arctic White";
+  const profile = spec.primary.name;
+  const shortProfile = spec.primary.productLine;
+  const sampleLine = `Order ${bodyName} and ${trimName} samples, hold them on the wall, and put ${shortProfile} in ${climate.zone}® with ColorPlus® in ${bodyName} on every bid you request.`;
+
+  switch (answers.stage) {
     case "need":
       return {
-        headline: "You have a wall problem to solve, not a style project — yet.",
-        summary:
-          "The first job is establishing whether water has reached the sheathing. That single fact decides your scope, your budget and your timeline.",
-        nextMilestone:
-          "Book one inspection that includes a moisture probe at the base of the walls and under the windows — before you collect any bids.",
+        headline: `Your answer is ${profile} in ${bodyName}.`,
+        summary: `What failed on your wall is exactly what fiber cement is engineered against — it doesn't rot, swell at the cut ends or feed mold, and the ${climate.zone}® board is formulated for your climate specifically. You're not just fixing a problem; you're choosing the last siding this house needs.`,
+        nextMilestone: sampleLine,
         supportingPoints: [
-          "Ask for photographs of the probe readings, not just a verbal summary.",
-          "Any bid written before someone has looked behind the siding is a guess.",
-          "Bring the spec below to that inspection so you are comparing the same system across every quote.",
+          `${spec.primary.texture} texture is the right call for your architecture — it reads correct from the street without the maintenance cycle of real wood.`,
+          "Ask each bidder to price the rot contingency as a unit price per sheet so a surprise behind the siding doesn't become an open-ended number.",
+          "The 30-year non-prorated substrate warranty is why this is a one-time decision rather than a recurring one.",
         ],
       };
     case "insurance":
       return {
-        headline: "Your claim and your specification are two separate conversations.",
-        summary:
-          "Handle the insurance scope first with documentation, then choose the system. Mixing the two costs homeowners money in both directions.",
-        nextMilestone:
-          "Document the damage — dated photos of every elevation and the test square — and request a supplement for code-required upgrades before signing any contract.",
+        headline: `Claim or no claim, ${profile} in ${bodyName} is the right rebuild.`,
+        summary: `Your carrier decides how much of it they fund. You decide what goes back on the house — and a hail claim is the cheapest opportunity you will ever get to upgrade the entire envelope to ${climate.zone}® fiber cement.`,
+        nextMilestone: `Put this exact spec into your claim scope — ${shortProfile}, ${climate.zone}®, ColorPlus® in ${bodyName} with ${trimName} trim — then order those two samples while the adjuster works.`,
         supportingPoints: [
           climate.hailCorridor
-            ? "Your state is in the hail corridor: most states have a uniform-appearance rule that can require replacing siding that can no longer be matched, not just the damaged elevation."
+            ? "You're in the hail corridor, where most states' uniform-appearance rules can extend the scope to elevations that can no longer be matched. Raise it in writing."
             : "Ask your adjuster in writing whether the undamaged elevations can be matched — if they can't, matching rules may extend the scope.",
-          "Code-required upgrades (housewrap, flashing, insulation) are often payable as a supplement even when the original scope omits them.",
-          "Do not let a contractor 'handle the deductible' — that is fraud, and it voids you as well as them.",
+          "Code-required upgrades — flashing, water-resistive barrier, insulation — are frequently payable as a supplement even when the first scope omits them.",
+          "Fiber cement resists the impact denting that got you here, which is worth raising with your carrier at renewal.",
         ],
       };
     case "justify":
       return {
-        headline: "This is a return-on-investment decision, so treat it like one.",
+        headline: `${profile} in ${bodyName} is the version a buyer pays for.`,
         summary:
-          "Fiber cement siding replacement consistently ranks among the highest-recouping exterior remodels, and it is the change a buyer sees before they open the door.",
-        nextMilestone:
-          "Get one bid for the full ColorPlus® spec below and ask your agent what comparable re-sided homes in your ZIP closed at versus the un-updated ones.",
+          "Fiber cement siding replacement consistently ranks among the highest-recouping exterior remodels, and it's the change a buyer registers before they reach the front door. The palette below is chosen to read correct to the broadest possible buyer, not to a personal favorite.",
+        nextMilestone: sampleLine,
         supportingPoints: [
-          "The transferable 30-year non-prorated warranty is a line item on your listing sheet, not just a document in a drawer.",
-          "A buyer's inspector will find soft sheathing. Fixing it before listing is always cheaper than negotiating it after.",
+          "The transferable 30-year non-prorated warranty belongs on your listing sheet — it's a document buyers can hold.",
           answers.timeline === "under-2"
-            ? "Under two years to sale: prioritize a broadly appealing palette over a personal favorite."
-            : "You have time to do this in the right season, which usually means a better crew at a better price.",
+            ? `${bodyName} is deliberately the broad-appeal choice. Save the bolder option for a house you're keeping.`
+            : "You have time to schedule in a good season, which usually means a better crew at a better price.",
+          "A buyer's inspector will find soft sheathing. Handling it before listing is always cheaper than negotiating it after.",
         ],
       };
     case "dream":
       return {
-        headline: "You're designing, so the constraints matter more than the inspiration.",
-        summary:
-          "Your roof, masonry and window color are already chosen for you. A palette that ignores them is the single most common and most expensive exterior mistake.",
-        nextMilestone:
-          "Order physical samples of the top palette below and view them on the actual wall — north face and south face, morning and late afternoon.",
+        headline: `${bodyName} with ${trimName} trim, on ${profile}.`,
+        summary: `This palette isn't a mood board — it's built against the roof, masonry and windows you told us are staying. That's why it will look right on your house specifically, and why a color you loved on someone else's might not have.`,
+        nextMilestone: sampleLine,
         supportingPoints: [
-          "Screen color is not real color. Fiber cement finishes shift noticeably with sheen and daylight.",
-          "Hold the sample against the roof and masonry, not against a white wall or a screen.",
-          "Decide the trim color before the body color if your windows are staying — trim has fewer options.",
+          `${spec.primary.texture} texture on ${shortProfile} is what gives you the look you're after without the repaint cycle.`,
+          "View samples on the north and south faces, morning and late afternoon. Fiber cement finishes shift noticeably with daylight and sheen.",
+          "If you want to push further, the second and third palettes below are progressively bolder from the same constraint set.",
         ],
       };
     case "estimate":
       return {
-        headline: "Your bids don't line up because they aren't quoting the same job.",
+        headline: `Give every bidder this: ${profile}, ${climate.zone}®, ColorPlus® in ${bodyName}.`,
         summary:
-          "Nearly every confusing bid spread comes from four omissions: the finish method, the flashing detail, the tear-off and disposal, and the rot contingency.",
-        nextMilestone:
-          "Send every bidder the same written scope — the spec and the five contractor questions below — and require them to re-quote to it line by line.",
+          "Your bids don't line up because they aren't quoting the same job. Four omissions cause nearly all of it: the finish method, the flashing detail, the tear-off and disposal, and the rot contingency. A written spec collapses the spread.",
+        nextMilestone: `Send all bidders the same scope — ${shortProfile} in ${climate.zone}® with ColorPlus® in ${bodyName}, ${trimName} trim, Trim-Over install — and require them to re-quote to the line structure below.`,
         supportingPoints: [
-          "A bid that says only 'Hardie siding' can legally mean primed board painted on site. That is a different product with a different warranty.",
-          "Require the rot contingency to be quoted as a unit price per sheet, not left open-ended.",
-          "The lowest bid is usually the one that left something out. Find out what.",
+          'A bid that says only "Hardie siding" can legally mean primed board painted on site. Different product, different warranty, different price.',
+          "Require the rot contingency as a unit price per sheet rather than an open allowance.",
+          "The lowest bid is usually the one that left something out. The audit list below tells you what to look for.",
         ],
       };
     case "selection":
       return {
-        headline: "You've made the decision. Now lock the specification.",
-        summary:
-          "The remaining risk is field substitution — the wrong Hardie Zone product, primed board instead of ColorPlus®, or missing joint flashing.",
-        nextMilestone:
-          "Put the spec below into your contract by name — profile, texture, ColorPlus® color, zone and trim — and require the packing slips to match at delivery.",
+        headline: `Locked: ${profile} in ${bodyName}, ${trimName} trim.`,
+        summary: `You've made the decision, so the only remaining risk is field substitution — the wrong Hardie Zone board, primed stock instead of ColorPlus®, or missing joint flashing.`,
+        nextMilestone: `Write the spec into the contract by name and require the delivery packing slips to show ${climate.zone}® and the ColorPlus® color at the door.`,
         supportingPoints: [
-          `Your climate requires the ${climate.zone}® product line. Confirm it on the delivery paperwork, not in conversation.`,
-          "ColorPlus® finish carries a separate 15-year finish warranty. Field paint does not.",
-          "Order one extra square of material for future repairs while your color is in current production.",
+          `Your climate requires the ${climate.zone}® line. Confirm it on paperwork, not in conversation.`,
+          "ColorPlus® carries a separate 15-year finish warranty. Field paint carries none.",
+          "Order one extra square while your color is in current production — discontinued colors make future repairs impossible to match.",
         ],
       };
     default:
       return {
-        headline: "Let's establish where you are.",
-        summary: "Complete the quiz and we will build your plan from your answers.",
+        headline: "Let's find your siding.",
+        summary: "Complete the quiz and we'll build the specification from your answers.",
         nextMilestone: "Start with the first question.",
         supportingPoints: [],
       };
@@ -819,7 +823,7 @@ export function buildPlan(answers: QuizAnswers): SidingPlan {
   const spec = buildProductSpec(answers, climate);
   const palettes = buildPalettes(answers);
   const cost = buildCostEstimate(answers, climate, spec);
-  const stageAction = buildStageAction(answers, climate);
+  const stageAction = buildStageAction(answers, climate, spec, palettes);
   const audit = buildAudit(answers, climate);
   const contractorQuestions = buildContractorQuestions(answers, climate);
   const persona = derivePersona(answers);

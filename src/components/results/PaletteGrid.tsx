@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { SectionHeading } from "@/components/results/SectionHeading";
 import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/components/ui/cn";
@@ -11,7 +10,7 @@ function Swatch({ role, color: swatch }: { role: string; color: HardieColor }) {
   return (
     <div className="flex-1">
       <div
-        className="flex h-20 items-end rounded-lg border border-black/10 p-2.5 sm:h-24"
+        className="print-exact flex h-20 items-end rounded-lg border border-black/10 p-2.5 sm:h-24"
         style={{ backgroundColor: swatch.hex }}
       >
         <span
@@ -31,8 +30,14 @@ function Swatch({ role, color: swatch }: { role: string; color: HardieColor }) {
   );
 }
 
-export function PaletteGrid({ palettes }: { palettes: Palette[] }) {
-  const [activeId, setActiveId] = useState<string>(palettes[0]?.id ?? "");
+interface PaletteGridProps {
+  palettes: Palette[];
+  selectedIndex: number;
+  onSelect: (index: number) => void;
+}
+
+export function PaletteGrid({ palettes, selectedIndex, onSelect }: PaletteGridProps) {
+  const activeId = palettes[selectedIndex]?.id ?? palettes[0]?.id ?? "";
 
   return (
     <section className="card p-6 sm:p-8">
@@ -44,13 +49,13 @@ export function PaletteGrid({ palettes }: { palettes: Palette[] }) {
       />
 
       <div className="grid gap-5 lg:grid-cols-3">
-        {palettes.map((palette) => {
+        {palettes.map((palette, index) => {
           const active = palette.id === activeId;
           return (
             <button
               key={palette.id}
               type="button"
-              onClick={() => setActiveId(palette.id)}
+              onClick={() => onSelect(index)}
               aria-pressed={active}
               className={cn(
                 "rounded-xl border p-4 text-left transition-all duration-150",
@@ -61,7 +66,11 @@ export function PaletteGrid({ palettes }: { palettes: Palette[] }) {
             >
               <div className="flex items-baseline justify-between gap-2">
                 <p className="text-[15px] font-extrabold text-hardie-800">{palette.name}</p>
-                {palette.hoaSafe ? (
+                {active ? (
+                  <span className="rounded-full bg-hardie-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+                    Selected
+                  </span>
+                ) : palette.hoaSafe ? (
                   <span className="rounded-full bg-hardie-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-hardie-700">
                     Board-friendly
                   </span>
@@ -100,7 +109,8 @@ export function PaletteGrid({ palettes }: { palettes: Palette[] }) {
       )}
 
       <p className="mt-5 text-[12px] leading-relaxed text-slateCharcoal-muted">
-        Swatches are screen approximations. Order physical samples and view them on the actual wall
+        The selected palette is the one carried into your printout, your saved plan and any link you
+        share. Swatches are screen approximations. Order physical samples and view them on the actual wall
         — north face and south face, morning and late afternoon — before you commit. Fiber cement
         finishes shift noticeably with sheen and daylight.
       </p>

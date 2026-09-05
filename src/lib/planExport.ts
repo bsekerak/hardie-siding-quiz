@@ -5,7 +5,7 @@ import type { QuizAnswers, SidingPlan } from "@/types/quiz";
  * Renders the finished plan as plain text so a homeowner can save it, print it
  * or paste it directly into an email to a contractor.
  */
-export function planToText(plan: SidingPlan, answers: QuizAnswers): string {
+export function planToText(plan: SidingPlan, answers: QuizAnswers, paletteIndex = 0): string {
   const lines: string[] = [];
   const rule = "=".repeat(64);
 
@@ -53,7 +53,8 @@ export function planToText(plan: SidingPlan, answers: QuizAnswers): string {
   lines.push("CURATED COLORPLUS PALETTES");
   lines.push("-".repeat(64));
   plan.palettes.forEach((palette, index) => {
-    lines.push(`${index + 1}. ${palette.name} — ${palette.tagline}`);
+    const marker = index === paletteIndex ? "  <-- SELECTED" : "";
+    lines.push(`${index + 1}. ${palette.name}${marker} — ${palette.tagline}`);
     lines.push(`   Body   : ${palette.body.name} (${palette.body.hex})`);
     lines.push(`   Trim   : ${palette.trim.name} (${palette.trim.hex})`);
     lines.push(`   Accent : ${palette.accent.name} (${palette.accent.hex})`);
@@ -109,8 +110,8 @@ export function planToText(plan: SidingPlan, answers: QuizAnswers): string {
 }
 
 /** Triggers a client-side download of the plan without any server round-trip. */
-export function downloadPlan(plan: SidingPlan, answers: QuizAnswers): void {
-  const blob = new Blob([planToText(plan, answers)], { type: "text/plain;charset=utf-8" });
+export function downloadPlan(plan: SidingPlan, answers: QuizAnswers, paletteIndex = 0): void {
+  const blob = new Blob([planToText(plan, answers, paletteIndex)], { type: "text/plain;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;

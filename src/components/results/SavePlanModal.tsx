@@ -10,12 +10,13 @@ import type { QuizAnswers, SidingPlan } from "@/types/quiz";
 interface SavePlanModalProps {
   plan: SidingPlan;
   answers: QuizAnswers;
+  paletteIndex: number;
   onClose: () => void;
 }
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
-export function SavePlanModal({ plan, answers, onClose }: SavePlanModalProps) {
+export function SavePlanModal({ plan, answers, paletteIndex, onClose }: SavePlanModalProps) {
   const [email, setEmail] = useState<string>("");
   const [touched, setTouched] = useState<boolean>(false);
   const [saved, setSaved] = useState<boolean>(false);
@@ -45,7 +46,7 @@ export function SavePlanModal({ plan, answers, onClose }: SavePlanModalProps) {
     } catch {
       // Storage unavailable — the download below still works.
     }
-    downloadPlan(plan, answers);
+    downloadPlan(plan, answers, paletteIndex);
     setSaved(true);
   };
 
