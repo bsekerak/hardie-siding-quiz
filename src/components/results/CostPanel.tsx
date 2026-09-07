@@ -41,7 +41,7 @@ export function CostPanel({ cost, costPreference }: CostPanelProps) {
       />
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className="bg-hardie-700 p-6 text-white">
+        <div className="bg-hardie-800 p-6 text-white">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
             Total project range
           </p>

@@ -31,7 +31,7 @@ interface EngineeringSummaryBarProps {
 
 export function EngineeringSummaryBar({ climate, spec }: EngineeringSummaryBarProps) {
   return (
-    <section className="bg-hardie-700">
+    <section className="bg-hardie-800">
       <div className="grid divide-y divide-white/20 sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4">
         <Stamp
           label="Climate Zone"

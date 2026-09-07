@@ -61,14 +61,14 @@ export function PaletteGrid({ palettes, selectedIndex, onSelect }: PaletteGridPr
               className={cn(
                 "relative rounded-none p-5 text-left transition-colors duration-150",
                 active
-                  ? "border-2 border-hardie-700 bg-hardie-50"
+                  ? "border-2 border-hardie-500 bg-hardie-50"
                   : "border border-stone-300 bg-white hover:border-slateCharcoal",
               )}
             >
               <div className="flex items-baseline justify-between gap-2">
                 <p className="text-[15px] font-black tracking-tight text-hardie-700">{palette.name}</p>
                 {active ? (
-                  <span className="bg-hardie-700 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-white">
+                  <span className="bg-hardie-500 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-white">
                     Selected
                   </span>
                 ) : palette.hoaSafe ? (
@@ -97,7 +97,7 @@ export function PaletteGrid({ palettes, selectedIndex, onSelect }: PaletteGridPr
 
       {palettes.map((palette) =>
         palette.id === activeId ? (
-          <div key={palette.id} className="mt-6 border-l-[3px] border-hardie-700 bg-stone-200 p-6">
+          <div key={palette.id} className="mt-6 border-l-[3px] border-hardie-500 bg-stone-200 p-6">
             <p className="flex items-center gap-2 text-sm font-bold text-hardie-800">
               <Icon name="CircleHelp" className="h-4 w-4" />
               Why {palette.name} works on your house

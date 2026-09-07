@@ -96,7 +96,7 @@ export function QuizEngine() {
         />
 
         {restored ? (
-          <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-l-[3px] border-hardie-700 bg-stone-200 px-5 py-3.5">
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-l-[3px] border-hardie-500 bg-stone-200 px-5 py-3.5">
             <p className="text-[13px] font-medium text-slateCharcoal">
               We picked up where you left off. Your answers are saved on this device.
             </p>
@@ -171,7 +171,7 @@ export function QuizEngine() {
               aria-current={index === stepIndex ? "step" : undefined}
               className={
                 index === stepIndex
-                  ? "h-[3px] w-8 bg-hardie-700"
+                  ? "h-[3px] w-8 bg-hardie-500"
                   : isStepAnswered(question, answers)
                     ? "h-[3px] w-8 bg-hardie-300"
                     : "h-[3px] w-8 bg-stone-300"

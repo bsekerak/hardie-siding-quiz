@@ -6,7 +6,7 @@ type Tone = "info" | "warn" | "critical";
 
 const TONES: Record<Tone, { wrapper: string; icon: string; iconName: string }> = {
   info: {
-    wrapper: "border-l-[3px] border-hardie-700 bg-stone-200 text-slateCharcoal",
+    wrapper: "border-l-[3px] border-hardie-500 bg-stone-200 text-slateCharcoal",
     icon: "text-hardie-700",
     iconName: "CircleHelp",
   },

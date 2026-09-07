@@ -2,15 +2,16 @@ import type { Config } from "tailwindcss";
 
 /**
  * ── BRAND RAMP ──────────────────────────────────────────────────────────────
- * The `hardie` scale below is the single place the primary hue is defined;
- * every component reads it through `hardie-*` classes.
+ * James Hardie's primary brand colour is GREEN, taken from their own compiled
+ * stylesheet: --primary-color-pure #00833E and --primary-color-high #163C20.
  *
- * Currently set to the specified Hardie Deep Navy (#002F6C / #0056B3).
+ *   500 #00833E  brand green — primary CTAs, selection, accent rules
+ *   600 #007035  pressed / hover
+ *   700 #005C2C  deep green — secondary outlines, body-copy green
+ *   800 #163C20  primary-color-high — large dark panels
  *
- * NOTE: jameshardie.com's own compiled stylesheet uses GREEN as its primary
- * (--primary-color-pure #00833E, --primary-color-high #163C20); navy does not
- * appear in their system. To switch back, replace the six mid/dark steps below
- * with: 500 #00833E, 600 #007035, 700 #005C2C, 800 #163C20, 900 #002A14.
+ * #00833E clears AA against white text at 4.87:1, so the brand green is used
+ * directly on CTAs rather than a darkened approximation.
  * ────────────────────────────────────────────────────────────────────────────
  */
 const config: Config = {
@@ -19,17 +20,17 @@ const config: Config = {
     extend: {
       colors: {
         hardie: {
-          DEFAULT: "#002F6C",
-          50: "#F2F6FC",
-          100: "#E6EEF8",
-          200: "#BFD4F1",
-          300: "#7FA9E4",
-          400: "#3B7DD8",
-          500: "#0056B3", // accent — links, hover, subheadings
-          600: "#00448F",
-          700: "#002F6C", // primary — hero, headers, primary CTA
-          800: "#002450",
-          900: "#001731",
+          DEFAULT: "#00833E",
+          50: "#EFF8F2",
+          100: "#D6EDDF",
+          200: "#A8D8BC",
+          300: "#6FBF93",
+          400: "#2FA163",
+          500: "#00833E", // brand green — CTAs, selection, accent rules
+          600: "#007035", // pressed / hover
+          700: "#005C2C", // deep green — outlines, green body copy
+          800: "#163C20", // primary-color-high — large dark panels
+          900: "#002A14",
         },
         // Editorial ink. Body copy and technical callouts.
         slateCharcoal: {

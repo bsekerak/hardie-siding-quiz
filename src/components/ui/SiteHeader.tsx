@@ -14,7 +14,7 @@ export function SiteHeader() {
         <Link href="/" className="flex items-center gap-3.5">
           <span
             aria-hidden="true"
-            className="flex h-10 w-10 items-center justify-center bg-hardie-700 text-[13px] font-black tracking-tight text-white"
+            className="flex h-10 w-10 items-center justify-center bg-hardie-500 text-[13px] font-black tracking-tight text-white"
           >
             JH
           </span>
@@ -35,7 +35,7 @@ export function SiteHeader() {
               href={link.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[12px] font-bold uppercase tracking-[0.1em] text-slateCharcoal-light transition-colors hover:text-hardie-500"
+              className="text-[12px] font-bold uppercase tracking-[0.1em] text-slateCharcoal-light transition-colors hover:text-hardie-600"
             >
               {link.label}
             </a>

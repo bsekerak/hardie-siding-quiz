@@ -8,11 +8,11 @@ type Size = "md" | "lg";
 /** Square, institutional CTAs. Never pills, never elevation. */
 const VARIANTS: Record<Variant, string> = {
   primary:
-    "bg-hardie-700 text-white border-2 border-hardie-700 hover:bg-hardie-800 hover:border-hardie-800 disabled:bg-stone-300 disabled:border-stone-300 disabled:text-slateCharcoal-muted",
+    "bg-hardie-500 text-white border-2 border-hardie-500 hover:bg-hardie-600 hover:border-hardie-600 disabled:bg-stone-300 disabled:border-stone-300 disabled:text-slateCharcoal-muted",
   secondary:
     "bg-white text-hardie-700 border-2 border-hardie-700 hover:bg-hardie-700 hover:text-white",
   ghost:
-    "bg-transparent text-slateCharcoal-light border-2 border-transparent hover:text-hardie-700 hover:underline",
+    "bg-transparent text-slateCharcoal-light border-2 border-transparent hover:text-hardie-600 hover:underline",
   gold: "bg-gold text-slateCharcoal border-2 border-gold hover:bg-gold-light hover:border-gold-light",
 };
 

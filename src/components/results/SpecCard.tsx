@@ -21,7 +21,7 @@ function SpecRow({ label, value, note }: { label: string; value: string; note?: 
 export function SpecCard({ spec }: { spec: ProductSpec }) {
   return (
     <section className="card">
-      <header className="flex flex-wrap items-baseline justify-between gap-3 border-b-2 border-hardie-700 bg-stone-100 px-6 py-5 sm:px-8">
+      <header className="flex flex-wrap items-baseline justify-between gap-3 border-b-2 border-hardie-500 bg-stone-100 px-6 py-5 sm:px-8">
         <div>
           <p className="eyebrow">Section 07 46 46 — Fiber Cement Siding</p>
           <h2 className="mt-1.5 text-24p font-black tracking-tight text-slateCharcoal sm:text-28p">

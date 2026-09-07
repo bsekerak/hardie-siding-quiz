@@ -81,7 +81,7 @@ function ResourceCard({ link }: { link: ResourceLink }) {
     >
       <span className="flex items-start justify-between gap-4">
         <span className="jh-link-title text-16p font-bold md:text-20p">{link.title}</span>
-        <ArrowOut className="mt-0.5 h-5 w-5 shrink-0 text-slateCharcoal transition-colors group-hover:text-hardie-500" />
+        <ArrowOut className="mt-0.5 h-5 w-5 shrink-0 text-slateCharcoal transition-colors group-hover:text-hardie-600" />
       </span>
       <span className="mt-3 block text-[13px] leading-relaxed text-slateCharcoal-light">
         {link.body}
@@ -123,7 +123,7 @@ export function PlanResources({ plan, answers }: PlanResourcesProps) {
           href={featured.href}
           target="_blank"
           rel="noopener noreferrer"
-          className="group mb-3 block bg-hardie-700 px-6 py-9 text-white sm:px-8"
+          className="group mb-3 block bg-hardie-800 px-6 py-9 text-white sm:px-8"
         >
           <span className="flex items-start justify-between gap-6">
             <span className="max-w-2xl">
@@ -157,7 +157,7 @@ export function PlanResources({ plan, answers }: PlanResourcesProps) {
         </div>
       </div>
 
-      <div className="mt-8 border-l-[3px] border-hardie-700 bg-stone-200 p-6">
+      <div className="mt-8 border-l-[3px] border-hardie-500 bg-stone-200 p-6">
         <p className="flex items-center gap-2 text-sm font-bold text-hardie-800">
           <Icon name="ClipboardCheck" className="h-4 w-4" />
           Walk into that visit with three things

@@ -43,14 +43,14 @@ export function OptionGrid<T extends string>({
             className={cn(
               "group relative flex w-full items-start gap-3.5 rounded-none p-5 text-left transition-colors duration-150",
               selected
-                ? "border-2 border-hardie-700 bg-hardie-50"
+                ? "border-2 border-hardie-500 bg-hardie-50"
                 : "border border-stone-300 bg-white hover:border-slateCharcoal",
             )}
           >
             {selected ? (
               <span
                 aria-hidden="true"
-                className="absolute right-0 top-0 flex h-6 w-6 items-center justify-center bg-hardie-700 text-white"
+                className="absolute right-0 top-0 flex h-6 w-6 items-center justify-center bg-hardie-500 text-white"
               >
                 <Icon name="Check" className="h-3.5 w-3.5" strokeWidth={3} />
               </span>

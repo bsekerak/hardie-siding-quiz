@@ -52,7 +52,7 @@ export function AuditChecklist({ items }: { items: AuditItem[] }) {
                   aria-hidden="true"
                   className={cn(
                     "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-none border-2 transition-colors",
-                    isChecked ? "border-hardie-700 bg-hardie-700 text-white" : "border-stone-400",
+                    isChecked ? "border-hardie-500 bg-hardie-500 text-white" : "border-stone-400",
                   )}
                 >
                   {isChecked ? <Icon name="Check" className="h-3.5 w-3.5" strokeWidth={3} /> : null}

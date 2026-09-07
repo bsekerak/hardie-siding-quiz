@@ -36,7 +36,7 @@ interface PrintSummaryProps {
  */
 export function PrintSummary({ plan, palette }: PrintSummaryProps) {
   return (
-    <section className="print-only mb-6 border-b-[3px] border-hardie-700 pb-6">
+    <section className="print-only mb-6 border-b-[3px] border-hardie-500 pb-6">
       <div className="flex items-start justify-between gap-6">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-hardie-700">

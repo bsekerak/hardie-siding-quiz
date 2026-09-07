@@ -38,7 +38,7 @@ function IncompleteState() {
   return (
     <div className="container-page py-20">
       <div className="mx-auto max-w-xl text-center">
-        <span className="mx-auto flex h-14 w-14 items-center justify-center bg-hardie-700 text-white">
+        <span className="mx-auto flex h-14 w-14 items-center justify-center bg-hardie-500 text-white">
           <Icon name="ClipboardCheck" className="h-7 w-7" />
         </span>
         <h1 className="mt-6 text-32p font-black tracking-tight text-slateCharcoal">
@@ -119,7 +119,7 @@ export function ResultsDashboard() {
         <PrintSummary plan={plan} palette={selectedPalette} />
 
         {shared ? (
-          <div data-print-hide className="border-l-[3px] border-hardie-700 bg-stone-200 p-5">
+          <div data-print-hide className="border-l-[3px] border-hardie-500 bg-stone-200 p-5">
             <p className="text-sm font-bold text-hardie-800">You&apos;re viewing a shared plan</p>
             <p className="mt-1.5 text-[13px] leading-relaxed text-hardie-700">
               This specification was built from someone else&apos;s answers. Your own saved session

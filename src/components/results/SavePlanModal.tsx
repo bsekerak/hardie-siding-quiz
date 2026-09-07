@@ -64,7 +64,7 @@ export function SavePlanModal({ plan, answers, paletteIndex, onClose }: SavePlan
         initial={{ opacity: 0, y: 24, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.2, ease: "easeOut" }}
-        className="w-full max-w-lg border-t-4 border-hardie-700 bg-white p-6 shadow-lifted sm:p-8"
+        className="w-full max-w-lg border-t-4 border-hardie-500 bg-white p-6 shadow-lifted sm:p-8"
       >
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -88,7 +88,7 @@ export function SavePlanModal({ plan, answers, paletteIndex, onClose }: SavePlan
 
         {saved ? (
           <div className="mt-5">
-            <div className="flex gap-3 border-l-[3px] border-hardie-700 bg-stone-200 p-4">
+            <div className="flex gap-3 border-l-[3px] border-hardie-500 bg-stone-200 p-4">
               <Icon name="Check" className="mt-0.5 h-5 w-5 shrink-0 text-hardie-700" />
               <p className="text-[13px] leading-relaxed text-hardie-800">
                 A plain-text copy of your full plan has been saved to your device. Forward it to

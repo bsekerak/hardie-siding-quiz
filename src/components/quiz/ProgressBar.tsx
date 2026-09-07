@@ -31,7 +31,7 @@ export function ProgressBar({ progress, stepIndex, totalSteps, question }: Progr
         aria-label="Quiz progress"
       >
         <motion.div
-          className="h-full bg-hardie-700"
+          className="h-full bg-hardie-500"
           initial={false}
           animate={{ width: `${Math.max(progress * 100, 2)}%` }}
           transition={{ type: "tween", ease: "easeOut", duration: 0.28 }}

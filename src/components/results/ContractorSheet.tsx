@@ -38,7 +38,7 @@ export function ContractorSheet({ questions }: { questions: ContractorQuestion[]
         {questions.map((item, index) => (
           <li key={item.id} className="border border-stone-300 bg-white p-5 sm:p-6">
             <div className="flex gap-3.5">
-              <span className="spec-num flex h-8 w-8 shrink-0 items-center justify-center bg-hardie-700 text-[12px] font-bold text-white">
+              <span className="spec-num flex h-8 w-8 shrink-0 items-center justify-center bg-hardie-500 text-[12px] font-bold text-white">
                 {String(index + 1).padStart(2, "0")}
               </span>
               <div className="flex-1">

@@ -9,7 +9,7 @@ interface StageBannerProps {
 
 export function StageBanner({ action, personaNote, diagnosis }: StageBannerProps) {
   return (
-    <section className="bg-hardie-700 text-white">
+    <section className="bg-hardie-800 text-white">
       <div className="p-6 sm:p-9">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">
           Where you are right now

@@ -86,7 +86,7 @@ export default function HomePage() {
 
             <dl className="mt-14 grid gap-8 sm:grid-cols-3">
               {BADGES.map((badge) => (
-                <div key={badge.title} className="border-t-[3px] border-hardie-700 pt-4">
+                <div key={badge.title} className="border-t-[3px] border-hardie-500 pt-4">
                   <dt className="text-16p font-black tracking-tight text-slateCharcoal">{badge.title}</dt>
                   <dd className="mt-2 text-[13px] leading-relaxed text-slateCharcoal-light">
                     {badge.body}
@@ -140,7 +140,7 @@ export default function HomePage() {
       </section>
 
       <section className="container-page py-16 sm:py-20">
-        <div className="bg-hardie-700 px-8 py-16 text-white sm:px-14">
+        <div className="bg-hardie-800 px-8 py-16 text-white sm:px-14">
           <h2 className="max-w-2xl text-32p font-black tracking-tight sm:text-40p">
             Your climate already chose half your specification. Let&apos;s find out what it picked.
           </h2>

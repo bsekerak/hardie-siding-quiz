@@ -45,7 +45,7 @@ export function ZipInput({ value, onChange, onSubmit }: ZipInputProps) {
       </p>
 
       {preview ? (
-        <div className="mt-5 border-l-[3px] border-hardie-700 bg-stone-200 p-5">
+        <div className="mt-5 border-l-[3px] border-hardie-500 bg-stone-200 p-5">
           <p className="eyebrow">Derived from your ZIP</p>
           <p className="mt-1.5 text-16p font-bold text-slateCharcoal">
             {preview.zone}® product line — {preview.regionLabel}

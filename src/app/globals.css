@@ -22,11 +22,11 @@
 
   /* Square, institutional focus ring — no glow. */
   :focus-visible {
-    @apply outline-none ring-2 ring-hardie-700 ring-offset-2 ring-offset-white;
+    @apply outline-none ring-2 ring-hardie-500 ring-offset-2 ring-offset-white;
   }
 
   ::selection {
-    @apply bg-hardie-700 text-white;
+    @apply bg-hardie-500 text-white;
   }
 }
 
@@ -64,7 +64,7 @@
   }
 
   .jh-link-title {
-    @apply text-slateCharcoal transition-colors group-hover:text-hardie-500 group-hover:underline;
+    @apply text-slateCharcoal transition-colors group-hover:text-hardie-600 group-hover:underline;
   }
 }
 
