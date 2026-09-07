@@ -35,9 +35,8 @@ export const EMPTY_ANSWERS: QuizAnswers = {
   masonry: null,
   windowTrim: null,
   hoa: null,
-  vibeBrightness: null,
-  vibeTemperature: null,
-  vibeContrast: null,
+  colorFamily: null,
+  trimPreference: null,
 };
 
 interface PersistedSession {

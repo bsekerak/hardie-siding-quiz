@@ -11,6 +11,7 @@ import {
   CURRENT_SIDING_OPTIONS,
   HEIGHT_OPTIONS,
   HOA_OPTIONS,
+  COLOR_FAMILY_OPTIONS,
   GUTTER_OPTIONS,
   HOME_AGE_OPTIONS,
   INSTALLER_OPTIONS,
@@ -21,11 +22,11 @@ import {
   STAGE_OPTIONS,
   SYMPTOM_OPTIONS,
   TIMELINE_OPTIONS,
-  VIBE_BRIGHTNESS_OPTIONS,
-  VIBE_CONTRAST_OPTIONS,
-  VIBE_TEMPERATURE_OPTIONS,
+  TRIM_PREFERENCE_OPTIONS,
   WINDOW_TRIM_OPTIONS,
 } from "@/data/questions";
+import { COLOR_FAMILIES, readFixedElements, undertoneClashMessage } from "@/data/palettes";
+import { color } from "@/data/colors";
 import type { QuestionMeta } from "@/types/quiz";
 
 function SubGroupLabel({ children }: { children: string }) {
@@ -43,6 +44,13 @@ interface QuestionRendererProps {
 
 export function QuestionRenderer({ question, onAutoAdvance }: QuestionRendererProps) {
   const { answers, setAnswer, toggleInList } = useQuiz();
+
+  // Surfaced live in Q15 so the homeowner sees the constraint as they choose,
+  // not for the first time on the results page.
+  const clash =
+    answers.colorFamily !== null
+      ? undertoneClashMessage(COLOR_FAMILIES[answers.colorFamily], readFixedElements(answers))
+      : null;
 
   switch (question.id) {
     case "stage":
@@ -370,39 +378,72 @@ export function QuestionRenderer({ question, onAutoAdvance }: QuestionRendererPr
         </div>
       );
 
-    case "vibe":
+    case "colorFamily":
       return (
-        <div className="space-y-7">
+        <div className="space-y-8">
           <div>
-            <SubGroupLabel>Pair 1 — Overall value</SubGroupLabel>
+            <SubGroupLabel>Color family</SubGroupLabel>
+            <div className="grid gap-px bg-stone-300 sm:grid-cols-2">
+              {COLOR_FAMILY_OPTIONS.map((option) => {
+                const family = COLOR_FAMILIES[option.value];
+                const selected = answers.colorFamily === option.value;
+                const swatches = [...family.anchors, ...family.members].slice(0, 5);
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={selected}
+                    onClick={() => setAnswer("colorFamily", option.value)}
+                    className={
+                      selected
+                        ? "bg-hardie-50 p-5 text-left ring-1 ring-inset ring-hardie-500"
+                        : "bg-white p-5 text-left transition-colors hover:bg-stone-50"
+                    }
+                  >
+                    <span className="flex h-12 overflow-hidden rounded-sm">
+                      {swatches.map((name) => (
+                        <span
+                          key={name}
+                          className="block flex-1"
+                          style={{ backgroundColor: color(name).hex }}
+                        />
+                      ))}
+                    </span>
+                    <span
+                      className={
+                        selected
+                          ? "mt-3 block text-16p font-bold text-hardie-600"
+                          : "mt-3 block text-16p font-bold text-slateCharcoal"
+                      }
+                    >
+                      {option.label}
+                    </span>
+                    <span className="mt-1.5 block text-[13px] leading-relaxed text-slateCharcoal-light">
+                      {option.description}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <SubGroupLabel>Trim preference</SubGroupLabel>
             <OptionGrid
-              name="Brightness"
-              options={VIBE_BRIGHTNESS_OPTIONS}
-              value={answers.vibeBrightness}
-              onSelect={(value) => setAnswer("vibeBrightness", value)}
+              name="Trim preference"
+              options={TRIM_PREFERENCE_OPTIONS}
+              value={answers.trimPreference}
+              onSelect={(value) => setAnswer("trimPreference", value)}
               columns={2}
             />
           </div>
-          <div>
-            <SubGroupLabel>Pair 2 — Undertone</SubGroupLabel>
-            <OptionGrid
-              name="Undertone"
-              options={VIBE_TEMPERATURE_OPTIONS}
-              value={answers.vibeTemperature}
-              onSelect={(value) => setAnswer("vibeTemperature", value)}
-              columns={2}
-            />
-          </div>
-          <div>
-            <SubGroupLabel>Pair 3 — Composition</SubGroupLabel>
-            <OptionGrid
-              name="Contrast"
-              options={VIBE_CONTRAST_OPTIONS}
-              value={answers.vibeContrast}
-              onSelect={(value) => setAnswer("vibeContrast", value)}
-              columns={2}
-            />
-          </div>
+
+          {clash ? (
+            <Callout tone="warn" title="Worth checking against samples">
+              {clash}
+            </Callout>
+          ) : null}
         </div>
       );
 

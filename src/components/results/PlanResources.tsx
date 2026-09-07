@@ -134,7 +134,7 @@ export function PlanResources({ plan, answers }: PlanResourcesProps) {
                 {featured.body}
               </span>
               <span className="mt-5 inline-block border-b-2 border-gold pb-1 text-[13px] font-bold uppercase tracking-[0.1em] text-gold">
-                Start with {plan.palettes[0]?.body.name ?? "your palette"}
+                Start with {plan.palettes[0]?.body.color.name ?? "your palette"}
               </span>
             </span>
             <ArrowOut className="h-6 w-6 shrink-0 text-white" />

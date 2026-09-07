@@ -1,3 +1,4 @@
+import { orderAs } from "@/data/palettes";
 import { formatCurrency, formatRange } from "@/lib/finance";
 import type { QuizAnswers, SidingPlan } from "@/types/quiz";
 
@@ -62,9 +63,9 @@ export function planToText(plan: SidingPlan, answers: QuizAnswers, paletteIndex 
   plan.palettes.forEach((palette, index) => {
     const marker = index === paletteIndex ? "  <-- SELECTED" : "";
     lines.push(`${index + 1}. ${palette.name}${marker} — ${palette.tagline}`);
-    lines.push(`   Body   : ${palette.body.name} (${palette.body.hex})`);
-    lines.push(`   Trim   : ${palette.trim.name} (${palette.trim.hex})`);
-    lines.push(`   Accent : ${palette.accent.name} (${palette.accent.hex})`);
+    lines.push(`   Body   (70%): ${palette.body.color.name} — ${orderAs(palette.body.color)}`);
+    lines.push(`   Trim   (20%): ${palette.trim.color.name} — ${orderAs(palette.trim.color)}`);
+    lines.push(`   Accent (10%): ${palette.accent.color.name} — ${orderAs(palette.accent.color)}`);
     lines.push("");
   });
 

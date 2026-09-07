@@ -43,7 +43,7 @@ export function PrintSummary({ plan, palette }: PrintSummaryProps) {
             James Hardie · Siding Specification
           </p>
           <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-slateCharcoal">
-            {palette.body.name} on {plan.spec.primary.productLine}
+            {palette.body.color.name} on {plan.spec.primary.productLine}
           </h1>
           <p className="mt-1 text-[12px] font-medium text-slateCharcoal-muted">
             ZIP {plan.climate.zip} · {plan.climate.regionLabel} · {plan.climate.zone}® product line
@@ -64,9 +64,9 @@ export function PrintSummary({ plan, palette }: PrintSummaryProps) {
           Selected palette — {palette.name}
         </p>
         <div className="mt-2 flex gap-3">
-          <PrintSwatch role="Body" swatch={palette.body} />
-          <PrintSwatch role="Trim" swatch={palette.trim} />
-          <PrintSwatch role="Accent" swatch={palette.accent} />
+          <PrintSwatch role={`Body · ${palette.body.sharePercent}%`} swatch={palette.body.color} />
+          <PrintSwatch role={`Trim · ${palette.trim.sharePercent}%`} swatch={palette.trim.color} />
+          <PrintSwatch role={`Accent · ${palette.accent.sharePercent}%`} swatch={palette.accent.color} />
         </div>
       </div>
 

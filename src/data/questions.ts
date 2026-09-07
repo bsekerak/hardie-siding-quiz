@@ -16,9 +16,8 @@ import type {
   Stage,
   Symptom,
   Timeline,
-  VibeBrightness,
-  VibeContrast,
-  VibeTemperature,
+  ColorFamily,
+  TrimPreference,
   WindowTrimColor,
 } from "@/types/quiz";
 
@@ -220,19 +219,45 @@ export const HOA_OPTIONS: ReadonlyArray<ChoiceOption<HoaStatus>> = [
   },
 ];
 
-export const VIBE_BRIGHTNESS_OPTIONS: ReadonlyArray<ChoiceOption<VibeBrightness>> = [
-  { value: "light-airy", label: "Light & Airy", description: "Reflective body, the house feels larger" },
-  { value: "deep-dramatic", label: "Deep & Dramatic", description: "Saturated body, trim and landscape pop" },
+export const COLOR_FAMILY_OPTIONS: ReadonlyArray<ChoiceOption<ColorFamily>> = [
+  {
+    value: "classic-neutrals",
+    label: "Classic Whites & Warm Neutrals",
+    description: "Arctic White, Cobble Stone — the broadest appeal and the lowest resale risk",
+  },
+  {
+    value: "architectural-grays",
+    label: "Architectural Grays",
+    description: "Pearl Gray, Iron Gray — crisp and current, strongest with black windows",
+  },
+  {
+    value: "earth-tones",
+    label: "Nature-Inspired Earth Tones",
+    description: "Mountain Sage, Timber Bark — settles a house into a wooded or rural lot",
+  },
+  {
+    value: "coastal-blues",
+    label: "Coastal Blues",
+    description: "Boothbay Blue, Evening Blue, Deep Ocean — cottage character without the kitsch",
+  },
+  {
+    value: "bold-dramatic",
+    label: "Bold & Dramatic",
+    description: "Night Gray, Iron Gray, Countrylane Red — high commitment, high reward",
+  },
 ];
 
-export const VIBE_TEMPERATURE_OPTIONS: ReadonlyArray<ChoiceOption<VibeTemperature>> = [
-  { value: "warm", label: "Warm Undertones", description: "Beige, taupe, greige, sand" },
-  { value: "cool", label: "Cool Undertones", description: "Gray, blue-gray, slate, sage" },
-];
-
-export const VIBE_CONTRAST_OPTIONS: ReadonlyArray<ChoiceOption<VibeContrast>> = [
-  { value: "monochromatic", label: "Classic Monochromatic + White Trim", description: "One body color, crisp trim" },
-  { value: "two-tone", label: "Two-Tone / Accent Textures", description: "A second color or texture on gables and bays" },
+export const TRIM_PREFERENCE_OPTIONS: ReadonlyArray<ChoiceOption<TrimPreference>> = [
+  {
+    value: "high-contrast",
+    label: "Crisp High-Contrast Trim",
+    description: "Trim reads as a deliberate architectural outline from the street",
+  },
+  {
+    value: "tonal",
+    label: "Tonal / Subtle Trim",
+    description: "Trim sits close to the body so the massing reads as one quiet volume",
+  },
 ];
 
 /* -------------------------------- Question set ------------------------------- */
@@ -360,12 +385,13 @@ const QUESTION_DEFS: ReadonlyArray<Omit<QuestionMeta, "number">> = [
     helper: "An approval process changes which colors are realistically available to you.",
   },
   {
-    id: "vibe",
+    id: "colorFamily",
     block: "D",
     blockLabel: "Your color strategy",
-    kind: "ab-pairs",
-    title: "Which aesthetic vibe feels like home?",
-    helper: "Three quick either/or choices. Go with your gut.",
+    kind: "compound",
+    title: "Which color family are you drawn to?",
+    helper:
+      "Every color below is a real James Hardie Statement Collection color. Pick the family — we'll choose the specific colors that work against the roof, masonry and windows you're keeping.",
   },
 ];
 

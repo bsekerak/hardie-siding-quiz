@@ -50,12 +50,8 @@ export function isStepAnswered(question: QuestionMeta, answers: QuizAnswers): bo
       return answers.roofTone !== null && answers.masonry !== null && answers.windowTrim !== null;
     case "hoa":
       return answers.hoa !== null;
-    case "vibe":
-      return (
-        answers.vibeBrightness !== null &&
-        answers.vibeTemperature !== null &&
-        answers.vibeContrast !== null
-      );
+    case "colorFamily":
+      return answers.colorFamily !== null && answers.trimPreference !== null;
     default:
       return false;
   }

@@ -28,7 +28,7 @@ export function PlanActions({ plan, answers, paletteIndex }: PlanActionsProps) {
     const url = buildShareUrl(answers, paletteIndex);
     const palette = plan.palettes[paletteIndex];
     const title = palette
-      ? `My James Hardie siding plan — ${palette.body.name} on ${plan.spec.primary.productLine}`
+      ? `My James Hardie siding plan — ${palette.body.color.name} on ${plan.spec.primary.productLine}`
       : "My James Hardie siding plan";
 
     if (typeof navigator.share === "function") {

@@ -88,9 +88,15 @@ export type WindowTrimColor = "classic-white" | "modern-black" | "warm-sand";
 
 export type HoaStatus = "hoa-historic" | "conformity" | "clean-slate";
 
-export type VibeBrightness = "light-airy" | "deep-dramatic";
-export type VibeTemperature = "warm" | "cool";
-export type VibeContrast = "monochromatic" | "two-tone";
+/** The five James Hardie Statement Collection families offered in Q15. */
+export type ColorFamily =
+  | "classic-neutrals"
+  | "architectural-grays"
+  | "earth-tones"
+  | "coastal-blues"
+  | "bold-dramatic";
+
+export type TrimPreference = "high-contrast" | "tonal";
 
 /* --------------------------------- Answers ---------------------------------- */
 
@@ -112,9 +118,8 @@ export interface QuizAnswers {
   /** Q13b */ masonry: Masonry | null;
   /** Q13c */ windowTrim: WindowTrimColor | null;
   /** Q14 */ hoa: HoaStatus | null;
-  /** Q15a */ vibeBrightness: VibeBrightness | null;
-  /** Q15b */ vibeTemperature: VibeTemperature | null;
-  /** Q15c */ vibeContrast: VibeContrast | null;
+  /** Q15a */ colorFamily: ColorFamily | null;
+  /** Q15b */ trimPreference: TrimPreference | null;
 }
 
 export type QuizAnswerKey = keyof QuizAnswers;
@@ -246,14 +251,26 @@ export interface HardieColor {
   lightness: number;
 }
 
+export interface PaletteRole {
+  color: HardieColor;
+  /** Share of the visible elevation this color should occupy. */
+  sharePercent: number;
+  roleLabel: string;
+  placement: string;
+}
+
 export interface Palette {
   id: string;
   name: string;
   tagline: string;
-  body: HardieColor;
-  trim: HardieColor;
-  accent: HardieColor;
+  family: ColorFamily;
+  familyLabel: string;
+  body: PaletteRole;
+  trim: PaletteRole;
+  accent: PaletteRole;
   rationale: string;
+  /** Set when the chosen family fights a fixed element the homeowner is keeping. */
+  undertoneWarning: string | null;
   hoaSafe: boolean;
 }
 

@@ -1,5 +1,5 @@
 import { buildClimateProfile } from "@/data/climate";
-import { HARDIE_COLORS, TRIM_COLOR_NAMES, color, contrastRatio } from "@/data/colors";
+import { buildPalettes } from "@/data/palettes";
 import { SIDING_PROFILES, STYLE_MATRIX } from "@/data/profiles";
 import { evaluateExteriorSystem } from "@/lib/system";
 import {
@@ -15,7 +15,6 @@ import type {
   ContractorQuestion,
   CostEstimate,
   CostLineItem,
-  HardieColor,
   Palette,
   Persona,
   ProductSpec,
@@ -81,8 +80,8 @@ export function buildStageAction(
   // lands on a siding decision the homeowner can act on; condition and claim
   // issues ride along as supporting notes rather than becoming the next step.
   const lead = palettes[0];
-  const bodyName = lead ? lead.body.name : "your body color";
-  const trimName = lead ? lead.trim.name : "Arctic White";
+  const bodyName = lead ? lead.body.color.name : "your body color";
+  const trimName = lead ? lead.trim.color.name : "Arctic White";
   const profile = spec.primary.name;
   const shortProfile = spec.primary.productLine;
   const sampleLine = `Order ${bodyName} and ${trimName} samples, hold them on the wall, and put ${shortProfile} in ${climate.zone}® with ColorPlus® in ${bodyName} on every bid you request.`;
@@ -177,7 +176,7 @@ function wantsSmooth(answers: QuizAnswers): boolean {
   return (
     answers.archStyle === "contemporary" ||
     answers.archStyle === "modern-farmhouse" ||
-    (answers.vibeContrast === "monochromatic" && answers.vibeBrightness === "deep-dramatic")
+    answers.colorFamily === "bold-dramatic"
   );
 }
 
@@ -259,7 +258,9 @@ export function buildProductSpec(answers: QuizAnswers, climate: ClimateProfile):
   const primaryId = wantsSmooth(answers) ? mapping.modernPrimary : mapping.primary;
   const primary: SidingProfile = SIDING_PROFILES[primaryId];
 
-  const useAccent = answers.vibeContrast === "two-tone" && mapping.accent !== null;
+  // A second texture only earns its place when the trim is already doing
+  // contrast work; a tonal scheme wants one uninterrupted field.
+  const useAccent = answers.trimPreference === "high-contrast" && mapping.accent !== null;
   const accent: SidingProfile | null = useAccent && mapping.accent ? SIDING_PROFILES[mapping.accent] : null;
 
   const wantsCustomColor = answers.priorities.includes("custom-color");
@@ -321,185 +322,6 @@ export function buildProductSpec(answers: QuizAnswers, climate: ClimateProfile):
     waterManagement,
     gutters: buildGutterSpec(answers, climate),
   };
-}
-
-/* ---------------------------------- Palettes --------------------------------- */
-
-interface ColorConstraint {
-  temperature: "warm" | "cool" | "either";
-  overridden: boolean;
-  reason: string;
-}
-
-function resolveTemperature(answers: QuizAnswers): ColorConstraint {
-  const warmFixtures =
-    (answers.roofTone === "warm-red-brown" ? 1 : 0) + (answers.masonry === "warm-brick" ? 1 : 0);
-  const coolFixtures =
-    (answers.roofTone === "cool-charcoal" ? 1 : 0) + (answers.masonry === "cool-gray-stone" ? 1 : 0);
-
-  const preference = answers.vibeTemperature ?? "warm";
-
-  if (warmFixtures > 0 && coolFixtures === 0) {
-    return {
-      temperature: "warm",
-      overridden: preference === "cool",
-      reason:
-        "Your roof or masonry carries a warm red-brown undertone that isn't changing. Cool grays placed next to warm brick read dirty and mismatched, so the palettes below stay in the warm and greige family.",
-    };
-  }
-  if (coolFixtures > 0 && warmFixtures === 0) {
-    return {
-      temperature: "cool",
-      overridden: preference === "warm",
-      reason:
-        "Your roof or masonry is cool-toned, so the palettes stay in the gray, slate and blue-gray family to keep the whole elevation reading as one deliberate scheme.",
-    };
-  }
-  if (warmFixtures > 0 && coolFixtures > 0) {
-    return {
-      temperature: "either",
-      overridden: false,
-      reason:
-        "You have both warm and cool fixed elements. Neutral greige bodies are the reliable bridge — they let the brick stay warm without fighting the roof.",
-    };
-  }
-  return {
-    temperature: preference,
-    overridden: false,
-    reason:
-      answers.roofTone === "replacing"
-        ? "You're replacing the roof, so the siding leads and the roof follows. Choose the siding first, then match the shingle to it."
-        : "Nothing fixed is forcing your hand, so we followed your stated undertone preference.",
-  };
-}
-
-function candidateBodies(answers: QuizAnswers, constraint: ColorConstraint): HardieColor[] {
-  const hoaLocked = answers.hoa === "hoa-historic";
-  return HARDIE_COLORS.filter((c) => {
-    if (hoaLocked && c.collection !== "Statement") return false;
-    if (hoaLocked && (c.lightness < 22 || c.name === "Countrylane Red")) return false;
-    if (constraint.temperature === "either") return true;
-    return c.undertone === constraint.temperature || c.undertone === "neutral";
-  });
-}
-
-function targetLightness(answers: QuizAnswers): number {
-  return answers.vibeBrightness === "deep-dramatic" ? 30 : 74;
-}
-
-function chooseTrim(body: HardieColor, answers: QuizAnswers): HardieColor {
-  const preferred: string =
-    answers.windowTrim === "modern-black"
-      ? body.lightness > 55
-        ? "Midnight Black"
-        : "Arctic White"
-      : answers.windowTrim === "warm-sand"
-        ? body.lightness > 55
-          ? "Monterey Taupe"
-          : "Sail Cloth"
-        : "Arctic White";
-
-  const candidate = color(preferred);
-  // White trim on a light body is a deliberate, classic low-contrast pairing —
-  // only substitute when the trim would genuinely disappear into the field.
-  if (contrastRatio(candidate.hex, body.hex) >= 1.3) return candidate;
-
-  // Aim for a ~3:1 architectural outline rather than maximum contrast, so a
-  // homeowner who asked for white trim doesn't get handed black.
-  const alternatives = TRIM_COLOR_NAMES.map((name) => color(name))
-    .filter((c) => c.name !== body.name && contrastRatio(c.hex, body.hex) >= 2)
-    .sort(
-      (a, b) =>
-        Math.abs(contrastRatio(a.hex, body.hex) - 3) -
-        Math.abs(contrastRatio(b.hex, body.hex) - 3),
-    );
-
-  return alternatives[0] ?? color("Arctic White");
-}
-
-function chooseAccent(body: HardieColor, trim: HardieColor, answers: QuizAnswers): HardieColor {
-  const wantsDarkAccent = body.lightness > 50;
-  const pool = HARDIE_COLORS.filter((c) => {
-    if (c.name === body.name || c.name === trim.name) return false;
-    if (answers.hoa === "hoa-historic" && c.collection !== "Statement") return false;
-    return wantsDarkAccent ? c.lightness <= 35 : c.lightness >= 65;
-  });
-
-  const scored = pool
-    .map((c) => ({ c, score: contrastRatio(c.hex, body.hex) }))
-    .sort((a, b) => b.score - a.score);
-
-  return scored[0]?.c ?? color("Midnight Black");
-}
-
-export function buildPalettes(answers: QuizAnswers): Palette[] {
-  const constraint = resolveTemperature(answers);
-  const pool = candidateBodies(answers, constraint);
-  const target = targetLightness(answers);
-
-  const ranked = [...pool].sort(
-    (a, b) => Math.abs(a.lightness - target) - Math.abs(b.lightness - target),
-  );
-
-  const bodies: HardieColor[] = [];
-  for (const candidate of ranked) {
-    if (bodies.length >= 3) break;
-    const farEnough = bodies.every((chosen) => Math.abs(chosen.lightness - candidate.lightness) >= 10);
-    if (farEnough) bodies.push(candidate);
-  }
-  // Backfill if the constrained pool was too tight to yield three distinct bodies.
-  for (const candidate of ranked) {
-    if (bodies.length >= 3) break;
-    if (!bodies.some((chosen) => chosen.name === candidate.name)) bodies.push(candidate);
-  }
-  while (bodies.length < 3) {
-    bodies.push(color("Cobble Stone"));
-  }
-
-  const names = ["The Safe Bet", "The Elevated Choice", "The Designer Move"] as const;
-  const taglines = [
-    "Broadest appeal, lowest regret. This is the palette that reads correct to almost everyone, including a future buyer.",
-    "One step more considered. Enough depth to look designed without becoming the house people describe by its color.",
-    "The confident option. Higher contrast and more commitment — best when your massing and trim can carry it.",
-  ] as const;
-
-  return bodies.slice(0, 3).map((body, index) => {
-    const trim = chooseTrim(body, answers);
-    const accent = chooseAccent(body, trim, answers);
-    const paletteName = names[index] ?? "Curated Palette";
-    const tagline = taglines[index] ?? "";
-    const contrast = contrastRatio(body.hex, trim.hex);
-
-    const rationaleParts: string[] = [constraint.reason];
-    if (answers.windowTrim === "modern-black") {
-      rationaleParts.push(
-        "Black windows want a high-contrast scheme — a mid-to-deep body with a decisive trim keeps them from reading as an accident.",
-      );
-    }
-    if (answers.hoa === "hoa-historic") {
-      rationaleParts.push(
-        "Locked to the ColorPlus® Statement Collection, which is what review boards approve most consistently.",
-      );
-    }
-    rationaleParts.push(
-      `Body-to-trim contrast ratio is ${contrast.toFixed(1)}:1 — ${
-        contrast >= 3
-          ? "strong enough to read as deliberate architectural outline from the street."
-          : "a soft, tonal outline. Choose this if you want the trim to disappear into the composition."
-      }`,
-    );
-
-    return {
-      id: `palette-${index + 1}`,
-      name: paletteName,
-      tagline,
-      body,
-      trim,
-      accent,
-      rationale: rationaleParts.join(" "),
-      hoaSafe: body.collection === "Statement" && trim.collection !== "Dream",
-    };
-  });
 }
 
 /* ------------------------------------ Cost ----------------------------------- */

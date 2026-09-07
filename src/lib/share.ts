@@ -1,5 +1,6 @@
 import {
   ARCH_STYLE_OPTIONS,
+  COLOR_FAMILY_OPTIONS,
   COST_PREFERENCE_OPTIONS,
   CURRENT_SIDING_OPTIONS,
   HEIGHT_OPTIONS,
@@ -14,9 +15,7 @@ import {
   STAGE_OPTIONS,
   SYMPTOM_OPTIONS,
   TIMELINE_OPTIONS,
-  VIBE_BRIGHTNESS_OPTIONS,
-  VIBE_CONTRAST_OPTIONS,
-  VIBE_TEMPERATURE_OPTIONS,
+  TRIM_PREFERENCE_OPTIONS,
   WINDOW_TRIM_OPTIONS,
 } from "@/data/questions";
 import { isValidZip } from "@/data/climate";
@@ -31,7 +30,7 @@ import type { ChoiceOption, QuizAnswers } from "@/types/quiz";
 
 const FIELD_SEPARATOR = "~";
 const LIST_SEPARATOR = ".";
-const VERSION = "2";
+const VERSION = "3";
 
 function valueSet<T extends string>(options: ReadonlyArray<ChoiceOption<T>>): ReadonlySet<string> {
   return new Set(options.map((option) => option.value));
@@ -54,9 +53,8 @@ const SETS = {
   masonry: valueSet(MASONRY_OPTIONS),
   windowTrim: valueSet(WINDOW_TRIM_OPTIONS),
   hoa: valueSet(HOA_OPTIONS),
-  vibeBrightness: valueSet(VIBE_BRIGHTNESS_OPTIONS),
-  vibeTemperature: valueSet(VIBE_TEMPERATURE_OPTIONS),
-  vibeContrast: valueSet(VIBE_CONTRAST_OPTIONS),
+  colorFamily: valueSet(COLOR_FAMILY_OPTIONS),
+  trimPreference: valueSet(TRIM_PREFERENCE_OPTIONS),
 } as const;
 
 export interface SharedPlan {
@@ -94,9 +92,8 @@ export function encodePlan(answers: QuizAnswers, paletteIndex: number): string {
     answers.masonry ?? "",
     answers.windowTrim ?? "",
     answers.hoa ?? "",
-    answers.vibeBrightness ?? "",
-    answers.vibeTemperature ?? "",
-    answers.vibeContrast ?? "",
+    answers.colorFamily ?? "",
+    answers.trimPreference ?? "",
     String(paletteIndex),
   ];
   return toBase64Url(fields.join(FIELD_SEPARATOR));
@@ -147,14 +144,13 @@ export function decodePlan(code: string): SharedPlan | null {
     masonry: single(parts[15], SETS.masonry) as QuizAnswers["masonry"],
     windowTrim: single(parts[16], SETS.windowTrim) as QuizAnswers["windowTrim"],
     hoa: single(parts[17], SETS.hoa) as QuizAnswers["hoa"],
-    vibeBrightness: single(parts[18], SETS.vibeBrightness) as QuizAnswers["vibeBrightness"],
-    vibeTemperature: single(parts[19], SETS.vibeTemperature) as QuizAnswers["vibeTemperature"],
-    vibeContrast: single(parts[20], SETS.vibeContrast) as QuizAnswers["vibeContrast"],
+    colorFamily: single(parts[18], SETS.colorFamily) as QuizAnswers["colorFamily"],
+    trimPreference: single(parts[19], SETS.trimPreference) as QuizAnswers["trimPreference"],
   };
 
   if (!isQuizComplete(answers)) return null;
 
-  const parsedIndex = Number.parseInt(parts[21] ?? "0", 10);
+  const parsedIndex = Number.parseInt(parts[20] ?? "0", 10);
   const paletteIndex = Number.isFinite(parsedIndex) && parsedIndex >= 0 && parsedIndex <= 2
     ? parsedIndex
     : 0;
