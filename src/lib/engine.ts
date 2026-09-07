@@ -272,7 +272,7 @@ export function buildProductSpec(answers: QuizAnswers, climate: ClimateProfile):
     ? "You named a specific color, so start in the ColorPlus® Dream Collection — several hundred factory-applied colors — before you consider field paint. Factory finish is baked on in a controlled environment and carries a 15-year finish warranty; a field-painted board does not."
     : "ColorPlus® Technology, not primed-and-field-painted. The finish is applied and baked in the factory, which is why it resists fading and never needs the scrape-and-repaint cycle that drives the real lifetime cost of siding.";
 
-  const system = evaluateExteriorSystem(answers, climate);
+  const system = evaluateExteriorSystem(answers, climate, primary);
 
   const trimColorHint =
     answers.windowTrim === "modern-black"

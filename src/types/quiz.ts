@@ -165,7 +165,10 @@ export interface ClimateProfile {
   drivers: string[];
   hailCorridor: boolean;
   wildfireWui: boolean;
+  /** Broad, advisory: salt-air guidance for fasteners. State-level, hedged. */
   coastalSalt: boolean;
+  /** Narrow: states where coastal plain dominates housing. Drives structural calls. */
+  coastalHighExposure: boolean;
   coldIecc: boolean;
   freezeThaw: boolean;
 }

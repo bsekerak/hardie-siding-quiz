@@ -92,6 +92,16 @@ const COASTAL_STATES = new Set([
   "NY", "CT", "RI", "MA", "NH", "ME", "CA", "OR", "WA", "AK",
 ]);
 
+/**
+ * States where coastal plain genuinely dominates the housing stock. The broad
+ * COASTAL_STATES set above is fine for a hedged fastener advisory, but it flags
+ * Dallas and Sacramento as coastal — so it must never drive a structural call
+ * like the install method. This narrower set does that job.
+ */
+const COASTAL_HIGH_EXPOSURE_STATES = new Set([
+  "FL", "HI", "DE", "RI", "SC", "LA", "MS", "AL", "GA", "NC",
+]);
+
 /** IECC climate zone 5 and colder — continuous insulation belongs in the bid. */
 const COLD_IECC_STATES = new Set([
   "AK", "ME", "NH", "VT", "MA", "CT", "RI", "NY", "PA", "OH", "IN", "IL", "IA",
@@ -152,6 +162,7 @@ export function buildClimateProfile(zip: string): ClimateProfile {
   const hailCorridor = state !== null && HAIL_STATES.has(state);
   const wildfireWui = state !== null && WUI_STATES.has(state);
   const coastalSalt = state !== null && COASTAL_STATES.has(state);
+  const coastalHighExposure = state !== null && COASTAL_HIGH_EXPOSURE_STATES.has(state);
   const coldIecc = state !== null && COLD_IECC_STATES.has(state);
   const freezeThaw = coldIecc || (state !== null && FREEZE_THAW_EXTRA.has(state));
 
@@ -206,6 +217,7 @@ export function buildClimateProfile(zip: string): ClimateProfile {
     hailCorridor,
     wildfireWui,
     coastalSalt,
+    coastalHighExposure,
     coldIecc,
     freezeThaw,
   };
