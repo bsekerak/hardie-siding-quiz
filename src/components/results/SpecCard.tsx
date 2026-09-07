@@ -61,7 +61,11 @@ export function SpecCard({ spec }: { spec: ProductSpec }) {
           value="ColorPlus® Technology factory finish"
           note={spec.finishRationale}
         />
-        <SpecRow label="Trim" value={spec.trim} note={spec.trimRationale} />
+        <SpecRow
+          label="Trim"
+          value={`${spec.trim.product} — ${spec.trim.material}, ${spec.trim.thickness}`}
+          note={`${spec.trim.reason} ${spec.trimColorNote}`}
+        />
         <SpecRow
           label="Gutters"
           value={spec.gutters.label}
@@ -69,10 +73,21 @@ export function SpecCard({ spec }: { spec: ProductSpec }) {
         />
         <SpecRow
           label="Install method"
-          value={spec.installMethod}
-          note={spec.installRationale}
+          value={spec.install.method}
+          note={spec.install.reason}
         />
       </dl>
+
+      {spec.trim.exclusionNote ? (
+        <div className="mt-6 border-l-2 border-gold bg-stone-100 p-5">
+          <p className="text-16p font-bold text-slateCharcoal">
+            Why not the other trim material?
+          </p>
+          <p className="mt-1.5 text-[13px] leading-relaxed text-slateCharcoal-light">
+            {spec.trim.exclusionNote}
+          </p>
+        </div>
+      ) : null}
 
       <div className="mt-8 border-l-2 border-hardie-500 bg-stone-100 p-6">
         <p className="flex items-center gap-2 text-sm font-bold text-hardie-800">

@@ -104,17 +104,17 @@ export interface QuizAnswers {
   /** Q7a */ height: Height | null;
   /** Q7b */ scope: Scope | null;
   /** Q8 */ gutters: GutterChoice | null;
-  /** Q8 */ priorities: Priority[];
-  /** Q9 */ timeline: Timeline | null;
-  /** Q10 */ installer: Installer | null;
-  /** Q11 */ costPreference: CostPreference | null;
-  /** Q12a */ roofTone: RoofTone | null;
-  /** Q12b */ masonry: Masonry | null;
-  /** Q12c */ windowTrim: WindowTrimColor | null;
-  /** Q13 */ hoa: HoaStatus | null;
-  /** Q14a */ vibeBrightness: VibeBrightness | null;
-  /** Q14b */ vibeTemperature: VibeTemperature | null;
-  /** Q14c */ vibeContrast: VibeContrast | null;
+  /** Q9 */ priorities: Priority[];
+  /** Q10 */ timeline: Timeline | null;
+  /** Q11 */ installer: Installer | null;
+  /** Q12 */ costPreference: CostPreference | null;
+  /** Q13a */ roofTone: RoofTone | null;
+  /** Q13b */ masonry: Masonry | null;
+  /** Q13c */ windowTrim: WindowTrimColor | null;
+  /** Q14 */ hoa: HoaStatus | null;
+  /** Q15a */ vibeBrightness: VibeBrightness | null;
+  /** Q15b */ vibeTemperature: VibeTemperature | null;
+  /** Q15c */ vibeContrast: VibeContrast | null;
 }
 
 export type QuizAnswerKey = keyof QuizAnswers;
@@ -189,6 +189,26 @@ export interface SidingProfile {
   costHigh: number;
 }
 
+export type TrimBrand = "James Hardie" | "AZEK";
+export type TrimMaterial = "Fiber Cement" | "Cellular PVC";
+export type InstallMethodName = "Hardie® Trim-Over Method" | "Traditional Trim-First Method";
+
+export interface TrimRecommendation {
+  brand: TrimBrand;
+  product: string;
+  material: TrimMaterial;
+  thickness: string;
+  reason: string;
+  /** Set when a rule actively ruled the other material out. */
+  exclusionNote: string | null;
+}
+
+export interface InstallMethodRecommendation {
+  method: InstallMethodName;
+  reason: string;
+  contractorNote: string;
+}
+
 export interface GutterSpec {
   choice: GutterChoice;
   label: string;
@@ -205,10 +225,9 @@ export interface ProductSpec {
   zone: HardieZone;
   finish: "ColorPlus" | "Primed for Field Paint";
   finishRationale: string;
-  trim: string;
-  trimRationale: string;
-  installMethod: string;
-  installRationale: string;
+  trim: TrimRecommendation;
+  trimColorNote: string;
+  install: InstallMethodRecommendation;
   waterManagement: string[];
   gutters: GutterSpec;
 }

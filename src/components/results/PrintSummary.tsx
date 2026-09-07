@@ -75,7 +75,8 @@ export function PrintSummary({ plan, palette }: PrintSummaryProps) {
           ["Profile", plan.spec.primary.name],
           ["Texture / exposure", `${plan.spec.primary.texture} — ${plan.spec.primary.exposure}`],
           ["Finish", "ColorPlus® Technology factory finish — not primed and field painted"],
-          ["Install method", "Trim-Over"],
+          ["Trim", `${plan.spec.trim.brand} ${plan.spec.trim.product} — ${plan.spec.trim.thickness}`],
+          ["Install method", plan.spec.install.method],
           ...(plan.spec.accent
             ? ([["Accent profile", `${plan.spec.accent.name} — ${plan.spec.accentPlacement ?? ""}`]] as const)
             : []),

@@ -43,8 +43,11 @@ export function planToText(plan: SidingPlan, answers: QuizAnswers, paletteIndex 
     lines.push(`Accent location : ${plan.spec.accentPlacement ?? "Per elevation"}`);
   }
   lines.push(`Finish          : ColorPlus(R) Technology factory finish`);
-  lines.push(`Trim            : ${plan.spec.trim}`);
-  lines.push(`Install method  : ${plan.spec.installMethod}`);
+
+  lines.push(`Trim            : ${plan.spec.trim.brand} ${plan.spec.trim.product}`);
+  lines.push(`Trim material   : ${plan.spec.trim.material}, ${plan.spec.trim.thickness}`);
+  lines.push(`Install method  : ${plan.spec.install.method}`);
+  lines.push(`Installer note  : ${plan.spec.install.contractorNote}`);
   lines.push(`Gutters         : ${plan.spec.gutters.label}`);
   if (plan.spec.gutters.downspout) {
     lines.push(`Downspouts      : ${plan.spec.gutters.downspout}`);

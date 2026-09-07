@@ -1,6 +1,7 @@
 import { buildClimateProfile } from "@/data/climate";
 import { HARDIE_COLORS, TRIM_COLOR_NAMES, color, contrastRatio } from "@/data/colors";
 import { SIDING_PROFILES, STYLE_MATRIX } from "@/data/profiles";
+import { evaluateExteriorSystem } from "@/lib/system";
 import {
   FINANCE_APR,
   FINANCE_TERM_MONTHS,
@@ -270,6 +271,8 @@ export function buildProductSpec(answers: QuizAnswers, climate: ClimateProfile):
     ? "You named a specific color, so start in the ColorPlus® Dream Collection — several hundred factory-applied colors — before you consider field paint. Factory finish is baked on in a controlled environment and carries a 15-year finish warranty; a field-painted board does not."
     : "ColorPlus® Technology, not primed-and-field-painted. The finish is applied and baked in the factory, which is why it resists fading and never needs the scrape-and-repaint cycle that drives the real lifetime cost of siding.";
 
+  const system = evaluateExteriorSystem(answers, climate);
+
   const trimColorHint =
     answers.windowTrim === "modern-black"
       ? "in a dark ColorPlus finish to carry the window line"
@@ -277,16 +280,7 @@ export function buildProductSpec(answers: QuizAnswers, climate: ClimateProfile):
         ? "in a warm neutral to bridge the windows and body"
         : "in Arctic White or a near-white to hold the classic outline";
 
-  const trim = `HardieTrim® 4/4 boards — 5.5" at corners and 3.5" at windows and doors, ${trimColorHint}. Add HardieTrim® 5/4 at the water table and any structural post wrap.`;
-
-  const trimRationale =
-    "Trim width is what makes an elevation read intentional. Under-scaled trim is the most visible tell of a budget re-side, and it is a small fraction of total cost.";
-
-  const installMethod =
-    "Trim-Over installation: HardieTrim® boards are installed over the siding field at corners and openings rather than butting siding into pre-set trim.";
-
-  const installRationale =
-    "Trim-Over lets the field boards run long and be cut to a clean line, removes the accumulated tolerance error that produces wavy corners, and keeps the vulnerable end cuts covered. It is faster in the field and it is the detail that most cleanly separates an experienced Hardie crew from a general remodeler.";
+  const trimColorNote = `Size it 5.5" at corners and 3.5" at windows and doors, ${trimColorHint}. Under-scaled trim is the most visible tell of a budget re-side, and it is a small fraction of total cost.`;
 
   const waterManagement: string[] = [
     "Continuous water-resistive barrier behind the siding, lapped shingle-fashion over all flashings.",
@@ -305,6 +299,9 @@ export function buildProductSpec(answers: QuizAnswers, climate: ClimateProfile):
       "Cold-climate assembly: continuous exterior insulation with furring, and fasteners long enough to reach the framing through the foam. Confirm fastener length is specified in writing.",
     );
   }
+
+  waterManagement.push(system.install.contractorNote);
+
   if (answers.scope !== "whole-house") {
     waterManagement.push(
       "Partial scope: specify a transition trim board at the boundary between new and existing siding. New ColorPlus® next to weathered siding will read as a visible mismatch, and it becomes more pronounced over the first two years.",
@@ -318,10 +315,9 @@ export function buildProductSpec(answers: QuizAnswers, climate: ClimateProfile):
     zone: climate.zone,
     finish,
     finishRationale,
-    trim,
-    trimRationale,
-    installMethod,
-    installRationale,
+    trim: system.trim,
+    trimColorNote,
+    install: system.install,
     waterManagement,
     gutters: buildGutterSpec(answers, climate),
   };
@@ -823,6 +819,7 @@ export function buildAudit(answers: QuizAnswers, climate: ClimateProfile): Audit
 export function buildContractorQuestions(
   answers: QuizAnswers,
   climate: ClimateProfile,
+  spec: ProductSpec,
 ): ContractorQuestion[] {
   const questions: ContractorQuestion[] = [
     {
@@ -859,6 +856,18 @@ export function buildContractorQuestions(
         'The published minimums are 6" to grade, 2" to roofing, and 1/4" above horizontal flashing. Violating them voids the warranty and wicks water into the board.',
       goodAnswer:
         "They quote the numbers back to you and can explain why they chose blind- or face-nailing for your wall.",
+    },
+    {
+      id: "method",
+      question: `Have you installed the ${spec.install.method} before? Walk me through your sequence at an outside corner.`,
+      whyItMatters:
+        spec.install.method.includes("Trim-Over")
+          ? "Trim-Over needs longer fasteners that reach framing through both trim and siding, and a crew that has only done trim-first will hang it short. That is a fastener pull-out problem two winters from now."
+          : "Trim-first lives or dies on the gap and the sealant at every siding-to-casing joint. A crew that jams the cut ends tight against the trim has built in a moisture trap.",
+      goodAnswer:
+        spec.install.method.includes("Trim-Over")
+          ? `They describe running the field boards long, cutting to a line, then fastening ${spec.trim.thickness} trim over the top into framing.`
+          : 'They mention the 1/8" gap, priming the field cuts, and using a high-performance sealant rather than painter\'s caulk.',
     },
     {
       id: "hidden",
@@ -919,7 +928,7 @@ export function buildPlan(answers: QuizAnswers): SidingPlan {
   const cost = buildCostEstimate(answers, climate, spec);
   const stageAction = buildStageAction(answers, climate, spec, palettes);
   const audit = buildAudit(answers, climate);
-  const contractorQuestions = buildContractorQuestions(answers, climate);
+  const contractorQuestions = buildContractorQuestions(answers, climate, spec);
   const persona = derivePersona(answers);
 
   return {
