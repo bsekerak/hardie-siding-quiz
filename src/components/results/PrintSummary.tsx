@@ -6,7 +6,7 @@ function PrintSwatch({ role, swatch }: { role: string; swatch: HardieColor }) {
   return (
     <div className="flex-1">
       <div
-        className="print-exact flex h-20 items-end rounded border border-black/20 p-2"
+        className="print-exact flex h-20 items-end border border-black/25 p-2"
         style={{ backgroundColor: swatch.hex }}
       >
         <span
@@ -36,13 +36,13 @@ interface PrintSummaryProps {
  */
 export function PrintSummary({ plan, palette }: PrintSummaryProps) {
   return (
-    <section className="print-only mb-6 border-b-2 border-hardie-700 pb-6">
+    <section className="print-only mb-6 border-b-[3px] border-hardie-700 pb-6">
       <div className="flex items-start justify-between gap-6">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-hardie-700">
             James Hardie · Siding Specification
           </p>
-          <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-slateCharcoal">
+          <h1 className="mt-1 text-24p font-black tracking-tight text-slateCharcoal">
             {palette.body.color.name} on {plan.spec.primary.productLine}
           </h1>
           <p className="mt-1 text-[12px] font-medium text-slateCharcoal-muted">
@@ -53,7 +53,7 @@ export function PrintSummary({ plan, palette }: PrintSummaryProps) {
           <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slateCharcoal-muted">
             Estimated investment
           </p>
-          <p className="text-lg font-extrabold text-slateCharcoal">
+          <p className="spec-num text-lg font-black text-slateCharcoal">
             {formatRange(plan.cost.totalLow, plan.cost.totalHigh)}
           </p>
         </div>

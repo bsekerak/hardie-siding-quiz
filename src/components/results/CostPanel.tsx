@@ -41,11 +41,11 @@ export function CostPanel({ cost, costPreference }: CostPanelProps) {
       />
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className="bg-hardie-800 p-6 text-white">
+        <div className="bg-hardie-700 p-6 text-white">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
             Total project range
           </p>
-          <p className="mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">
+          <p className="spec-num mt-2 text-3xl font-black tracking-tight sm:text-4xl">
             {formatRange(cost.totalLow, cost.totalHigh)}
           </p>
           <p className="mt-2 text-[13px] leading-relaxed text-hardie-100">
@@ -54,7 +54,7 @@ export function CostPanel({ cost, costPreference }: CostPanelProps) {
         </div>
         <div className="bg-stone-100 p-6">
           <p className="eyebrow">Estimated monthly</p>
-          <p className="mt-2 text-3xl font-extrabold tracking-tight text-hardie-800 sm:text-4xl">
+          <p className="spec-num mt-2 text-3xl font-black tracking-tight text-hardie-700 sm:text-4xl">
             {formatCurrency(cost.monthlyLow)} – {formatCurrency(cost.monthlyHigh)}
           </p>
           <p className="mt-2 text-[13px] leading-relaxed text-slateCharcoal-muted">
@@ -64,7 +64,7 @@ export function CostPanel({ cost, costPreference }: CostPanelProps) {
         </div>
       </div>
 
-      <div className="mt-6 border-l-2 border-gold bg-stone-100 p-5">
+      <div className="mt-6 border-l-[3px] border-gold bg-stone-200 p-5">
         <p className="text-sm font-bold text-slateCharcoal">{framing.title}</p>
         <p className="mt-1.5 text-[13px] leading-relaxed text-slateCharcoal-light">{framing.body}</p>
       </div>
@@ -92,7 +92,7 @@ export function CostPanel({ cost, costPreference }: CostPanelProps) {
                   Board, trim, fasteners, labor and the ColorPlus® finish.
                 </p>
               </td>
-              <td className="whitespace-nowrap py-4 text-right text-sm font-bold text-slateCharcoal">
+              <td className="spec-num whitespace-nowrap py-4 text-right text-[13px] font-bold text-slateCharcoal">
                 {formatRange(cost.sidingLow, cost.sidingHigh)}
               </td>
             </tr>
@@ -102,7 +102,7 @@ export function CostPanel({ cost, costPreference }: CostPanelProps) {
                   <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-slateCharcoal">
                     {item.label}
                     {item.oftenHidden ? (
-                      <span className="rounded-full bg-gold/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-gold-dark">
+                      <span className="border border-gold-dark px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-gold-dark">
                         Often omitted
                       </span>
                     ) : null}
@@ -111,14 +111,14 @@ export function CostPanel({ cost, costPreference }: CostPanelProps) {
                     {item.detail}
                   </p>
                 </td>
-                <td className="whitespace-nowrap py-4 text-right text-sm font-bold text-slateCharcoal">
+                <td className="spec-num whitespace-nowrap py-4 text-right text-[13px] font-bold text-slateCharcoal">
                   {formatRange(item.low, item.high)}
                 </td>
               </tr>
             ))}
             <tr>
-              <td className="py-4 text-base font-extrabold text-hardie-800">Total</td>
-              <td className="whitespace-nowrap py-4 text-right text-base font-extrabold text-hardie-800">
+              <td className="py-4 text-base font-black uppercase tracking-[0.08em] text-hardie-700">Total</td>
+              <td className="spec-num whitespace-nowrap py-4 text-right text-base font-black text-hardie-700">
                 {formatRange(cost.totalLow, cost.totalHigh)}
               </td>
             </tr>

@@ -77,7 +77,7 @@ function ResourceCard({ link }: { link: ResourceLink }) {
       href={link.href}
       target="_blank"
       rel="noopener noreferrer"
-      className="group flex flex-col bg-stone-100 px-6 pb-6 pt-6"
+      className="group flex flex-col bg-stone-100 p-6"
     >
       <span className="flex items-start justify-between gap-4">
         <span className="jh-link-title text-16p font-bold md:text-20p">{link.title}</span>
@@ -123,17 +123,17 @@ export function PlanResources({ plan, answers }: PlanResourcesProps) {
           href={featured.href}
           target="_blank"
           rel="noopener noreferrer"
-          className="group mb-3 block bg-hardie-800 px-6 py-8 text-white sm:px-8"
+          className="group mb-3 block bg-hardie-700 px-6 py-9 text-white sm:px-8"
         >
           <span className="flex items-start justify-between gap-6">
             <span className="max-w-2xl">
-              <span className="block text-24p font-bold group-hover:underline sm:text-28p">
+              <span className="block text-24p font-black tracking-tight group-hover:underline sm:text-28p">
                 {featured.title}
               </span>
               <span className="mt-3 block text-[14px] leading-relaxed text-stone-200">
                 {featured.body}
               </span>
-              <span className="mt-5 inline-block border-b-2 border-gold pb-1 text-[13px] font-bold uppercase tracking-[0.1em] text-gold">
+              <span className="mt-5 inline-block border border-gold px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-gold">
                 Start with {plan.palettes[0]?.body.color.name ?? "your palette"}
               </span>
             </span>
@@ -157,28 +157,28 @@ export function PlanResources({ plan, answers }: PlanResourcesProps) {
         </div>
       </div>
 
-      <div className="mt-8 border-l-2 border-hardie-500 bg-stone-100 p-6">
+      <div className="mt-8 border-l-[3px] border-hardie-700 bg-stone-200 p-6">
         <p className="flex items-center gap-2 text-sm font-bold text-hardie-800">
           <Icon name="ClipboardCheck" className="h-4 w-4" />
           Walk into that visit with three things
         </p>
         <ol className="mt-3 space-y-2 text-[13px] leading-relaxed text-slateCharcoal-light">
           <li className="flex gap-3">
-            <span className="font-bold text-hardie-700">1.</span>
+            <span className="spec-num font-bold text-hardie-700">1.</span>
             <span>
               Your printed plan — the spec sheet names the profile, {plan.spec.zone}® zone, ColorPlus®
               color and gutter size, so nothing gets substituted quietly.
             </span>
           </li>
           <li className="flex gap-3">
-            <span className="font-bold text-hardie-700">2.</span>
+            <span className="spec-num font-bold text-hardie-700">2.</span>
             <span>
               The {plan.contractorQuestions.length} questions above. Ask them in order, and write down
               what you hear rather than trusting your memory of three different visits.
             </span>
           </li>
           <li className="flex gap-3">
-            <span className="font-bold text-hardie-700">3.</span>
+            <span className="spec-num font-bold text-hardie-700">3.</span>
             <span>
               The hidden-costs checklist. Every unchecked line is a line that becomes a change order
               once the walls are open.

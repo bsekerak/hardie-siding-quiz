@@ -8,7 +8,7 @@ import type { ContractorQuestion } from "@/types/quiz";
 
 function questionsToText(questions: ContractorQuestion[]): string {
   return questions
-    .map((item, index) => `${index + 1}. ${item.question}\n   (Looking for: ${item.goodAnswer})`)
+    .map((item, index) => `${String(index + 1).padStart(2, "0")}. ${item.question}\n   (Looking for: ${item.goodAnswer})`)
     .join("\n\n");
 }
 
@@ -36,13 +36,13 @@ export function ContractorSheet({ questions }: { questions: ContractorQuestion[]
 
       <ol className="space-y-4">
         {questions.map((item, index) => (
-          <li key={item.id} className="bg-stone-100 p-6">
+          <li key={item.id} className="border border-stone-300 bg-white p-5 sm:p-6">
             <div className="flex gap-3.5">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-hardie-500 text-[13px] font-bold text-white">
-                {index + 1}
+              <span className="spec-num flex h-8 w-8 shrink-0 items-center justify-center bg-hardie-700 text-[12px] font-bold text-white">
+                {String(index + 1).padStart(2, "0")}
               </span>
               <div className="flex-1">
-                <p className="text-[15px] font-bold leading-snug text-slateCharcoal">
+                <p className="text-[15px] font-bold leading-snug tracking-tight text-slateCharcoal">
                   &ldquo;{item.question}&rdquo;
                 </p>
                 <p className="mt-2.5 text-[13px] leading-relaxed text-slateCharcoal-muted">

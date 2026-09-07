@@ -1,13 +1,12 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* jameshardie.com sets its type in Helvetica Now/Helvetica Pro (--font-helveticaPro
-   in their bundle). That face is licensed, so we name it first for anyone whose
-   machine has it and fall back through the Helvetica family it belongs to. */
 :root {
-  --font-helvetica-pro: "Helvetica Now Text", "Helvetica Now Display", "Helvetica Neue",
-    Helvetica, Arial, sans-serif;
+  --font-sans: "Inter", "Neue Haas Grotesk Display", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 @layer base {
@@ -17,13 +16,13 @@
   }
 
   body {
-    @apply bg-stone-100 text-slateCharcoal antialiased;
-    font-family: theme("fontFamily.sans");
+    @apply bg-white text-slateCharcoal antialiased;
+    font-family: var(--font-sans);
   }
 
-  /* A single consistent focus treatment across cards, chips and buttons. */
+  /* Square, institutional focus ring — no glow. */
   :focus-visible {
-    @apply outline-none ring-2 ring-gold ring-offset-2 ring-offset-stone-100;
+    @apply outline-none ring-2 ring-hardie-700 ring-offset-2 ring-offset-white;
   }
 
   ::selection {
@@ -36,38 +35,39 @@
     @apply mx-auto w-full max-w-6xl px-5 sm:px-8;
   }
 
-  /* jameshardie.com blocks are flat: a tint or a hairline rule, 4px radius at
-     most, and no shadow. The lift comes from the section rhythm, not the box. */
+  /* Structural panel: 1px border, square, zero elevation. */
   .card {
-    @apply rounded border border-stone-300 bg-white;
+    @apply border border-stone-300 bg-white;
   }
 
   .block-tint {
-    @apply rounded bg-stone-100;
+    @apply bg-stone-100;
   }
 
+  /* Uppercase category eyebrow. */
   .eyebrow {
-    @apply text-xs font-bold uppercase tracking-[0.14em] text-hardie-600;
+    @apply text-xs font-bold uppercase tracking-[0.16em] text-slateCharcoal-muted;
   }
 
-  /* JH's link treatment: the title turns brand green and underlines. No border
-     colour change, no shadow, no scale. */
+  /* Tabular figures for dimensions, reveals, costs and measurements. */
+  .spec-num {
+    @apply font-mono tabular-nums tracking-tight;
+  }
+
+  /* Architectural submittal row. */
+  .spec-row {
+    @apply grid gap-1 border-b border-stone-300 py-4 sm:grid-cols-[200px_1fr] sm:gap-6;
+  }
+
+  .spec-label {
+    @apply text-[11px] font-bold uppercase tracking-[0.12em] text-slateCharcoal-muted;
+  }
+
   .jh-link-title {
     @apply text-slateCharcoal transition-colors group-hover:text-hardie-500 group-hover:underline;
   }
-
-  .prose-note {
-    @apply text-sm leading-relaxed text-slateCharcoal-muted;
-  }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-}
-
-/* Homeowners print the results page and hand it to contractors. */
 .print-only {
   display: none;
 }
@@ -88,8 +88,7 @@
   }
 
   /* Browsers drop background colors when printing by default, which would send
-     a color specification to paper with every swatch blank. These regions are
-     the whole point of the printout, so force them to render. */
+     a color specification to paper with every swatch blank. */
   .print-exact,
   .print-exact * {
     -webkit-print-color-adjust: exact !important;
@@ -109,6 +108,12 @@
   a[href^="http"]::after {
     content: " (" attr(href) ")";
     font-size: 10px;
-    color: #64748b;
+    color: #4a5568;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
   }
 }

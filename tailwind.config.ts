@@ -1,19 +1,17 @@
 import type { Config } from "tailwindcss";
 
 /**
- * Brand tokens extracted from jameshardie.com's own compiled stylesheet so this
- * tool reads as part of the James Hardie system rather than a lookalike:
+ * ── BRAND RAMP ──────────────────────────────────────────────────────────────
+ * The `hardie` scale below is the single place the primary hue is defined;
+ * every component reads it through `hardie-*` classes.
  *
- *   #00833e  primary green (the dominant brand color on jameshardie.com)
- *   #007035  green, pressed/hover state
- *   #262627  body ink        #23263b  deep navy-ink used for dark panels
- *   #f6f5f3  warm page ground        #f9f8f7  warm card white
- *   #d9d9d9 / #eaeaea  rules and borders
- *   #82705e  warm taupe      #ebaa6e  warm tan accent
+ * Currently set to the specified Hardie Deep Navy (#002F6C / #0056B3).
  *
- * The scale below extends those anchors into usable steps. #00833e sits at 500
- * and clears AA against white text (4.87:1); steps 700-900 carry the large dark
- * panels, and green *text* on the light ground uses 600 or darker.
+ * NOTE: jameshardie.com's own compiled stylesheet uses GREEN as its primary
+ * (--primary-color-pure #00833E, --primary-color-high #163C20); navy does not
+ * appear in their system. To switch back, replace the six mid/dark steps below
+ * with: 500 #00833E, 600 #007035, 700 #005C2C, 800 #163C20, 900 #002A14.
+ * ────────────────────────────────────────────────────────────────────────────
  */
 const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],
@@ -21,87 +19,76 @@ const config: Config = {
     extend: {
       colors: {
         hardie: {
-          DEFAULT: "#00833e",
-          50: "#EFF8F2",
-          100: "#D6EDDF",
-          200: "#A8D8BC",
-          300: "#6FBF93",
-          400: "#2FA163",
-          500: "#00833e",
-          600: "#007035",
-          700: "#005C2C",
-          800: "#163C20",
-          900: "#002A14",
+          DEFAULT: "#002F6C",
+          50: "#F2F6FC",
+          100: "#E6EEF8",
+          200: "#BFD4F1",
+          300: "#7FA9E4",
+          400: "#3B7DD8",
+          500: "#0056B3", // accent — links, hover, subheadings
+          600: "#00448F",
+          700: "#002F6C", // primary — hero, headers, primary CTA
+          800: "#002450",
+          900: "#001731",
         },
-        // Named for the roles the components already use, remapped to JH ink.
-        // JH's neutral ramp: text #333, muted #555, rules #DDD / #EEE.
+        // Editorial ink. Body copy and technical callouts.
         slateCharcoal: {
-          DEFAULT: "#333333",
-          light: "#555555",
-          muted: "#6E6E6E",
-          deep: "#163C20",
+          DEFAULT: "#1A202C",
+          light: "#2D3748",
+          muted: "#4A5568",
+          deep: "#1A202C",
         },
+        // Architectural warm white / putty — alternating background bands.
         stone: {
-          DEFAULT: "#F6F5F3",
-          50: "#FBFAF9",
-          100: "#F6F5F3",
-          200: "#EEEEEE",
-          300: "#DDDDDD",
-          400: "#B9B9B9",
+          DEFAULT: "#F8F9FA",
+          50: "#FFFFFF",
+          100: "#F8F9FA",
+          200: "#F1F3F5",
+          300: "#E2E8F0",
+          400: "#CBD5E1",
+          500: "#94A3B8",
         },
-        // secondary-color-* on jameshardie.com
-        sand: {
-          DEFAULT: "#D4CCC4",
-          low: "#F6F5F3",
-        },
+        // Heritage ochre — badges, warranty highlights, ratings.
         gold: {
-          DEFAULT: "#EBAA6E",
-          light: "#F2C491",
-          dark: "#8A5A22",
+          DEFAULT: "#D99B26",
+          light: "#E8B75C",
+          dark: "#8A6114",
         },
-        taupe: {
-          DEFAULT: "#82705E",
-          light: "#A8988A",
-        },
+        sand: { DEFAULT: "#E2E8F0", low: "#F1F3F5" },
       },
       fontFamily: {
         sans: [
-          "var(--font-helvetica-pro)",
-          "Helvetica Now Display",
-          "Helvetica Neue",
-          "Helvetica",
+          "var(--font-sans)",
           "Inter",
+          "Neue Haas Grotesk Display",
+          "Helvetica Neue",
           "Arial",
           "sans-serif",
         ],
-      },
-      // JH blocks are flat. "card" is intentionally near-invisible and kept only
-      // so overlays (modals) have something to lift with.
-      boxShadow: {
-        card: "none",
-        lifted: "0 2px 4px rgba(51, 51, 51, 0.06), 0 18px 40px -18px rgba(51, 51, 51, 0.28)",
+        mono: ["var(--font-mono)", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
       },
       fontSize: {
-        "16p": ["1rem", { lineHeight: "1.375rem" }],
-        "20p": ["1.25rem", { lineHeight: "1.5rem" }],
-        "24p": ["1.5rem", { lineHeight: "1.75rem" }],
-        "28p": ["1.75rem", { lineHeight: "2rem" }],
+        "16p": ["1rem", { lineHeight: "1.5rem" }],
+        "20p": ["1.25rem", { lineHeight: "1.6rem" }],
+        "24p": ["1.5rem", { lineHeight: "1.85rem" }],
+        "28p": ["1.75rem", { lineHeight: "2.05rem" }],
         "32p": ["2rem", { lineHeight: "2.25rem" }],
-        "40p": ["2.5rem", { lineHeight: "2.75rem" }],
-        "48p": ["3rem", { lineHeight: "3.25rem" }],
+        "40p": ["2.5rem", { lineHeight: "2.7rem" }],
+        "48p": ["3rem", { lineHeight: "3.2rem" }],
       },
-      borderRadius: {
-        xl2: "1.25rem",
+      borderRadius: { xl2: "2px" },
+      // Structural edges only. No floating elevation anywhere in the app.
+      boxShadow: {
+        card: "none",
+        lifted: "0 12px 32px -12px rgba(26, 32, 44, 0.35)",
       },
       keyframes: {
         "fade-up": {
-          "0%": { opacity: "0", transform: "translateY(8px)" },
+          "0%": { opacity: "0", transform: "translateY(6px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
       },
-      animation: {
-        "fade-up": "fade-up 0.4s ease-out both",
-      },
+      animation: { "fade-up": "fade-up 0.35s ease-out both" },
     },
   },
   plugins: [],

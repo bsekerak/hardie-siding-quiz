@@ -37,7 +37,7 @@ export function ZipInput({ value, onChange, onSubmit }: ZipInputProps) {
           onKeyDown={(event) => {
             if (event.key === "Enter" && valid) onSubmit();
           }}
-          className="w-full rounded border border-stone-300 bg-white py-4 pl-12 pr-4 text-lg font-semibold tracking-[0.12em] text-slateCharcoal placeholder:font-normal placeholder:tracking-normal placeholder:text-stone-400 focus:border-hardie-500"
+          className="w-full rounded-none border border-stone-400 bg-white py-4 pl-12 pr-4 spec-num text-xl font-semibold tracking-[0.16em] text-slateCharcoal placeholder:font-normal placeholder:tracking-normal placeholder:text-stone-400 focus:border-hardie-500"
         />
       </div>
       <p id="zip-help" className="mt-2 text-[13px] text-slateCharcoal-muted">
@@ -45,7 +45,7 @@ export function ZipInput({ value, onChange, onSubmit }: ZipInputProps) {
       </p>
 
       {preview ? (
-        <div className="mt-5 border-l-2 border-hardie-500 bg-stone-100 p-4">
+        <div className="mt-5 border-l-[3px] border-hardie-700 bg-stone-200 p-5">
           <p className="eyebrow">Derived from your ZIP</p>
           <p className="mt-1.5 text-16p font-bold text-slateCharcoal">
             {preview.zone}® product line — {preview.regionLabel}

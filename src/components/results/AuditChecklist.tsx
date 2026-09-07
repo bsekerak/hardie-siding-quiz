@@ -7,9 +7,9 @@ import { cn } from "@/components/ui/cn";
 import type { AuditItem } from "@/types/quiz";
 
 const SEVERITY_STYLES: Record<AuditItem["severity"], { label: string; className: string }> = {
-  required: { label: "Required", className: "bg-red-100 text-red-800" },
-  recommended: { label: "Recommended", className: "bg-gold/20 text-gold-dark" },
-  watch: { label: "Watch for it", className: "bg-stone-200 text-slateCharcoal-light" },
+  required: { label: "Required", className: "border border-red-700 text-red-800" },
+  recommended: { label: "Recommended", className: "border border-gold-dark text-gold-dark" },
+  watch: { label: "Watch", className: "border border-stone-400 text-slateCharcoal-muted" },
 };
 
 export function AuditChecklist({ items }: { items: AuditItem[] }) {
@@ -33,7 +33,7 @@ export function AuditChecklist({ items }: { items: AuditItem[] }) {
         description="Tick them off as each bidder answers. An unanswered line is a line that becomes a change order later."
       />
 
-      <ul className="space-y-2.5">
+      <ul className="divide-y divide-stone-300 border-y border-stone-300">
         {items.map((item) => {
           const isChecked = checked.has(item.id);
           const severity = SEVERITY_STYLES[item.severity];
@@ -44,17 +44,15 @@ export function AuditChecklist({ items }: { items: AuditItem[] }) {
                 onClick={() => toggle(item.id)}
                 aria-pressed={isChecked}
                 className={cn(
-                  "flex w-full gap-3.5 rounded border p-4 text-left transition-colors duration-150",
-                  isChecked
-                    ? "border-stone-300 bg-hardie-50"
-                    : "border-stone-300 bg-white hover:border-slateCharcoal",
+                  "flex w-full gap-4 rounded-none p-4 text-left transition-colors duration-150",
+                  isChecked ? "bg-hardie-50" : "bg-white hover:bg-stone-100",
                 )}
               >
                 <span
                   aria-hidden="true"
                   className={cn(
-                    "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-colors",
-                    isChecked ? "border-hardie-700 bg-hardie-700 text-white" : "border-stone-300",
+                    "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-none border-2 transition-colors",
+                    isChecked ? "border-hardie-700 bg-hardie-700 text-white" : "border-stone-400",
                   )}
                 >
                   {isChecked ? <Icon name="Check" className="h-3.5 w-3.5" strokeWidth={3} /> : null}
@@ -63,15 +61,15 @@ export function AuditChecklist({ items }: { items: AuditItem[] }) {
                   <span className="flex flex-wrap items-center gap-2">
                     <span
                       className={cn(
-                        "text-[15px] font-semibold leading-snug",
-                        isChecked ? "text-hardie-800 line-through decoration-hardie-400" : "text-slateCharcoal",
+                        "text-[15px] font-bold leading-snug tracking-tight",
+                        isChecked ? "text-hardie-700 line-through decoration-hardie-400" : "text-slateCharcoal",
                       )}
                     >
                       {item.label}
                     </span>
                     <span
                       className={cn(
-                        "rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
+                        "px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em]",
                         severity.className,
                       )}
                     >
@@ -88,8 +86,8 @@ export function AuditChecklist({ items }: { items: AuditItem[] }) {
         })}
       </ul>
 
-      <p className="mt-5 text-[13px] font-medium text-slateCharcoal-muted">
-        {checked.size} of {items.length} confirmed
+      <p className="spec-num mt-5 text-[12px] font-bold uppercase tracking-[0.12em] text-slateCharcoal">
+        {String(checked.size).padStart(2, "0")} / {String(items.length).padStart(2, "0")} confirmed
       </p>
     </section>
   );

@@ -19,7 +19,7 @@ export function ClimateBadge({ climate }: ClimateBadgeProps) {
       <div className="flex flex-wrap items-start justify-between gap-5">
         <div>
           <p className="eyebrow">Engineered for Climate®</p>
-          <p className="mt-1 text-3xl font-extrabold tracking-tight text-hardie-800">
+          <p className="spec-num mt-1 text-3xl font-black tracking-tight text-hardie-700">
             {climate.zone}
             <span className="align-super text-base">®</span>
           </p>
@@ -27,7 +27,7 @@ export function ClimateBadge({ climate }: ClimateBadgeProps) {
             ZIP {climate.zip} · {climate.regionLabel}
           </p>
         </div>
-        <span className="inline-flex items-center gap-2 rounded-full bg-hardie-50 px-4 py-2 text-[13px] font-semibold text-hardie-700">
+        <span className="inline-flex items-center gap-2 border border-stone-400 px-4 py-2 text-[12px] font-bold uppercase tracking-[0.08em] text-slateCharcoal">
           <Icon name="ShieldCheck" className="h-4 w-4" />
           Class A fire rating · ASTM E136 non-combustible
         </span>
@@ -40,7 +40,7 @@ export function ClimateBadge({ climate }: ClimateBadgeProps) {
           {flags.map((flag) => (
             <span
               key={flag.label}
-              className="inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 px-3 py-1.5 text-xs font-semibold text-slateCharcoal"
+              className="inline-flex items-center gap-1.5 border border-gold-dark px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-gold-dark"
             >
               <Icon name={flag.icon} className="h-3.5 w-3.5" />
               {flag.label}

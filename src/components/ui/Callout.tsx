@@ -6,17 +6,17 @@ type Tone = "info" | "warn" | "critical";
 
 const TONES: Record<Tone, { wrapper: string; icon: string; iconName: string }> = {
   info: {
-    wrapper: "border-l-2 border-hardie-500 bg-stone-100 text-slateCharcoal",
-    icon: "text-hardie-500",
+    wrapper: "border-l-[3px] border-hardie-700 bg-stone-200 text-slateCharcoal",
+    icon: "text-hardie-700",
     iconName: "CircleHelp",
   },
   warn: {
-    wrapper: "border-l-2 border-gold bg-stone-100 text-slateCharcoal",
+    wrapper: "border-l-[3px] border-gold bg-stone-200 text-slateCharcoal",
     icon: "text-gold-dark",
     iconName: "TriangleAlert",
   },
   critical: {
-    wrapper: "border-l-2 border-red-700 bg-red-50 text-slateCharcoal",
+    wrapper: "border-l-[3px] border-red-700 bg-red-50 text-slateCharcoal",
     icon: "text-red-700",
     iconName: "ShieldAlert",
   },

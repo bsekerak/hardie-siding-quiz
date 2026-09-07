@@ -18,6 +18,10 @@ const COLUMN_CLASS: Record<1 | 2 | 3, string> = {
   3: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
 };
 
+/**
+ * Architectural tile selector: square edges, 1px structural border, and a 2px
+ * navy border plus a corner checkmark badge when selected. No glow, no lift.
+ */
 export function OptionGrid<T extends string>({
   name,
   options,
@@ -37,44 +41,47 @@ export function OptionGrid<T extends string>({
             aria-checked={selected}
             onClick={() => onSelect(option.value)}
             className={cn(
-              "group flex w-full items-start gap-3.5 rounded border p-4 text-left transition-colors duration-150",
+              "group relative flex w-full items-start gap-3.5 rounded-none p-5 text-left transition-colors duration-150",
               selected
-                ? "border-hardie-500 bg-hardie-50"
-                : "border-stone-300 bg-white hover:border-slateCharcoal",
+                ? "border-2 border-hardie-700 bg-hardie-50"
+                : "border border-stone-300 bg-white hover:border-slateCharcoal",
             )}
           >
+            {selected ? (
+              <span
+                aria-hidden="true"
+                className="absolute right-0 top-0 flex h-6 w-6 items-center justify-center bg-hardie-700 text-white"
+              >
+                <Icon name="Check" className="h-3.5 w-3.5" strokeWidth={3} />
+              </span>
+            ) : null}
+
             {option.icon ? (
               <span
                 className={cn(
                   "mt-0.5 shrink-0 transition-colors",
-                  selected ? "text-hardie-500" : "text-slateCharcoal-light",
+                  selected ? "text-hardie-700" : "text-slateCharcoal-muted",
                 )}
               >
                 <Icon name={option.icon} className="h-5 w-5" />
               </span>
             ) : null}
-            <span className="flex-1">
+
+            <span className="flex-1 pr-4">
               <span
                 className={cn(
-                  "block text-16p font-bold",
-                  selected ? "text-hardie-600" : "text-slateCharcoal",
+                  "block text-[15px] font-bold leading-snug tracking-tight",
+                  selected ? "text-hardie-700" : "text-slateCharcoal",
                 )}
               >
                 {option.label}
               </span>
               {option.description ? (
-                <span className="mt-1.5 block text-[13px] leading-relaxed text-slateCharcoal-light">
+                <span className="mt-1.5 block text-[13px] leading-relaxed text-slateCharcoal-muted">
                   {option.description}
                 </span>
               ) : null}
             </span>
-            <span
-              aria-hidden="true"
-              className={cn(
-                "mt-1 h-4 w-4 shrink-0 rounded-full border transition-colors",
-                selected ? "border-hardie-500 bg-hardie-500 ring-2 ring-inset ring-white" : "border-stone-400",
-              )}
-            />
           </button>
         );
       })}

@@ -11,7 +11,7 @@ function Swatch({ role, share, color: swatch }: { role: string; share: number; c
   return (
     <div className="flex-1">
       <div
-        className="print-exact flex h-20 items-end rounded-lg border border-black/10 p-2.5 sm:h-24"
+        className="print-exact flex h-24 items-end border border-black/15 p-2.5 sm:h-28"
         style={{ backgroundColor: swatch.hex }}
       >
         <span
@@ -21,12 +21,12 @@ function Swatch({ role, share, color: swatch }: { role: string; share: number; c
           {role} · {share}%
         </span>
       </div>
-      <p className="mt-2 text-[13px] font-semibold leading-tight text-slateCharcoal">
+      <p className="mt-2 text-[13px] font-bold leading-tight tracking-tight text-slateCharcoal">
         {swatch.name}
       </p>
-      <p className="text-[11px] font-medium uppercase tracking-wide text-slateCharcoal-muted">
-        {swatch.collection} Collection
-      </p>
+      <span className="mt-1 inline-block border border-stone-400 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-slateCharcoal-muted">
+        {swatch.collection}
+      </span>
     </div>
   );
 }
@@ -49,7 +49,7 @@ export function PaletteGrid({ palettes, selectedIndex, onSelect }: PaletteGridPr
         description={`${palettes[0]?.familyLabel ?? "Your family"}, filtered against the roof, masonry and windows you\u2019re keeping.`}
       />
 
-      <div className="grid gap-5 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-3">
         {palettes.map((palette, index) => {
           const active = palette.id === activeId;
           return (
@@ -59,20 +59,20 @@ export function PaletteGrid({ palettes, selectedIndex, onSelect }: PaletteGridPr
               onClick={() => onSelect(index)}
               aria-pressed={active}
               className={cn(
-                "rounded border p-4 text-left transition-all duration-150",
+                "relative rounded-none p-5 text-left transition-colors duration-150",
                 active
-                  ? "border-hardie-500 bg-hardie-50"
-                  : "border-stone-300 bg-white hover:border-slateCharcoal",
+                  ? "border-2 border-hardie-700 bg-hardie-50"
+                  : "border border-stone-300 bg-white hover:border-slateCharcoal",
               )}
             >
               <div className="flex items-baseline justify-between gap-2">
-                <p className="text-[15px] font-extrabold text-hardie-800">{palette.name}</p>
+                <p className="text-[15px] font-black tracking-tight text-hardie-700">{palette.name}</p>
                 {active ? (
-                  <span className="rounded-full bg-hardie-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+                  <span className="bg-hardie-700 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-white">
                     Selected
                   </span>
                 ) : palette.hoaSafe ? (
-                  <span className="rounded-full bg-hardie-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-hardie-700">
+                  <span className="border border-stone-400 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-slateCharcoal-muted">
                     Board-friendly
                   </span>
                 ) : null}
@@ -80,7 +80,7 @@ export function PaletteGrid({ palettes, selectedIndex, onSelect }: PaletteGridPr
               <p className="mt-1.5 text-[13px] leading-relaxed text-slateCharcoal-muted">
                 {palette.tagline}
               </p>
-              <div className="mt-4 flex h-3 overflow-hidden rounded-sm">
+              <div className="mt-4 flex h-4">
                 <span className="block" style={{ width: "70%", backgroundColor: palette.body.color.hex }} />
                 <span className="block" style={{ width: "20%", backgroundColor: palette.trim.color.hex }} />
                 <span className="block" style={{ width: "10%", backgroundColor: palette.accent.color.hex }} />
@@ -97,7 +97,7 @@ export function PaletteGrid({ palettes, selectedIndex, onSelect }: PaletteGridPr
 
       {palettes.map((palette) =>
         palette.id === activeId ? (
-          <div key={palette.id} className="mt-6 border-l-2 border-hardie-500 bg-stone-100 p-6">
+          <div key={palette.id} className="mt-6 border-l-[3px] border-hardie-700 bg-stone-200 p-6">
             <p className="flex items-center gap-2 text-sm font-bold text-hardie-800">
               <Icon name="CircleHelp" className="h-4 w-4" />
               Why {palette.name} works on your house
@@ -127,7 +127,7 @@ export function PaletteGrid({ palettes, selectedIndex, onSelect }: PaletteGridPr
       )}
 
       {palettes[0]?.undertoneWarning ? (
-        <div className="mt-6 border-l-2 border-gold bg-stone-100 p-5">
+        <div className="mt-6 border-l-[3px] border-gold bg-stone-200 p-5">
           <p className="text-16p font-bold text-slateCharcoal">Check this one on the wall</p>
           <p className="mt-1.5 text-[13px] leading-relaxed text-slateCharcoal-light">
             {palettes[0].undertoneWarning}

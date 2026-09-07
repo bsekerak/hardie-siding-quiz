@@ -70,12 +70,12 @@ export function QuizEngine() {
     return (
       <div className="container-page py-12">
         <div className="mx-auto max-w-3xl animate-pulse space-y-5">
-          <div className="h-1.5 w-full rounded-full bg-stone-200" />
-          <div className="h-9 w-3/4 rounded-lg bg-stone-200" />
-          <div className="h-4 w-1/2 rounded bg-stone-200" />
+          <div className="h-[3px] w-full bg-stone-300" />
+          <div className="h-9 w-3/4 bg-stone-200" />
+          <div className="h-4 w-1/2 bg-stone-200" />
           <div className="grid gap-3 sm:grid-cols-2">
             {[0, 1, 2, 3, 4, 5].map((key) => (
-              <div key={key} className="h-24 rounded bg-stone-200" />
+              <div key={key} className="h-24 bg-stone-200" />
             ))}
           </div>
         </div>
@@ -96,7 +96,7 @@ export function QuizEngine() {
         />
 
         {restored ? (
-          <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-l-2 border-hardie-500 bg-stone-100 px-4 py-3">
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-l-[3px] border-hardie-700 bg-stone-200 px-5 py-3.5">
             <p className="text-[13px] font-medium text-slateCharcoal">
               We picked up where you left off. Your answers are saved on this device.
             </p>
@@ -131,7 +131,7 @@ export function QuizEngine() {
             <p className="eyebrow">Question {currentQuestion.number} of {TOTAL_QUESTION_COUNT}</p>
             <h1
               id="question-title"
-              className="mt-2 text-28p font-bold text-slateCharcoal sm:text-40p"
+              className="mt-2.5 text-28p font-black tracking-tight text-slateCharcoal sm:text-40p"
             >
               {currentQuestion.title}
             </h1>
@@ -159,7 +159,7 @@ export function QuizEngine() {
             </span>
             <Button size="lg" onClick={handleNext} disabled={!canAdvance}>
               {isLastStep ? "Build my siding plan" : "Continue"}
-              <Icon name="ArrowRight" className="h-4 w-4" />
+              <span aria-hidden="true">&rarr;</span>
             </Button>
           </div>
         </div>
@@ -171,10 +171,10 @@ export function QuizEngine() {
               aria-current={index === stepIndex ? "step" : undefined}
               className={
                 index === stepIndex
-                  ? "h-1.5 w-8 rounded-full bg-hardie-700"
+                  ? "h-[3px] w-8 bg-hardie-700"
                   : isStepAnswered(question, answers)
-                    ? "h-1.5 w-8 rounded-full bg-hardie-300"
-                    : "h-1.5 w-8 rounded-full bg-stone-200"
+                    ? "h-[3px] w-8 bg-hardie-300"
+                    : "h-[3px] w-8 bg-stone-300"
               }
             />
           ))}

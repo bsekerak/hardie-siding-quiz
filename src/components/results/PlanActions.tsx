@@ -58,10 +58,10 @@ export function PlanActions({ plan, answers, paletteIndex }: PlanActionsProps) {
   return (
     <section
       data-print-hide
-      className="rounded border border-hardie-200 bg-white p-6  sm:p-8"
+      className="card p-6  sm:p-8"
     >
       <p className="eyebrow">What to do next</p>
-      <h2 className="mt-1 text-xl font-extrabold tracking-tight text-hardie-800 sm:text-2xl">
+      <h2 className="mt-1.5 text-24p font-black tracking-tight text-slateCharcoal sm:text-28p">
         Take your specification into the real world
       </h2>
       <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slateCharcoal-muted">
@@ -73,7 +73,7 @@ export function PlanActions({ plan, answers, paletteIndex }: PlanActionsProps) {
         <button
           type="button"
           onClick={() => void share()}
-          className="flex items-center gap-3 bg-stone-100 p-5 text-left transition-colors hover:border-slateCharcoal"
+          className="flex items-center gap-3 border border-stone-300 bg-white p-5 text-left transition-colors hover:border-slateCharcoal"
         >
           <Icon name={shareState === "copied" ? "Check" : "Share2"} className="h-5 w-5 shrink-0 text-hardie-700" />
           <span>
@@ -88,7 +88,7 @@ export function PlanActions({ plan, answers, paletteIndex }: PlanActionsProps) {
         <button
           type="button"
           onClick={() => setModalOpen(true)}
-          className="flex items-center gap-3 bg-stone-100 p-5 text-left transition-colors hover:border-slateCharcoal"
+          className="flex items-center gap-3 border border-stone-300 bg-white p-5 text-left transition-colors hover:border-slateCharcoal"
         >
           <Icon name="Mail" className="h-5 w-5 shrink-0 text-hardie-700" />
           <span>
@@ -99,7 +99,7 @@ export function PlanActions({ plan, answers, paletteIndex }: PlanActionsProps) {
         <button
           type="button"
           onClick={retake}
-          className="flex items-center gap-3 bg-stone-100 p-5 text-left transition-colors hover:border-slateCharcoal"
+          className="flex items-center gap-3 border border-stone-300 bg-white p-5 text-left transition-colors hover:border-slateCharcoal"
         >
           <Icon name="RotateCcw" className="h-5 w-5 shrink-0 text-hardie-700" />
           <span>

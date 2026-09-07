@@ -34,10 +34,10 @@ export function ChipGroup<T extends string>({
               aria-checked={selected}
               onClick={() => onToggle(option.value)}
               className={cn(
-                "inline-flex items-center gap-2 rounded border px-4 py-2.5 text-sm font-semibold transition-colors duration-150",
+                "inline-flex items-center gap-2 rounded-none px-4 py-2.5 text-[13px] font-bold tracking-tight transition-colors duration-150",
                 selected
-                  ? "border-hardie-500 bg-hardie-500 text-white"
-                  : "border-stone-300 bg-white text-slateCharcoal hover:border-slateCharcoal",
+                  ? "border-2 border-hardie-700 bg-hardie-700 text-white"
+                  : "border border-stone-300 bg-white text-slateCharcoal hover:border-slateCharcoal",
                 !selected && atCap ? "opacity-60" : "",
               )}
             >

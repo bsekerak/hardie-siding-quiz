@@ -64,14 +64,14 @@ export function SavePlanModal({ plan, answers, paletteIndex, onClose }: SavePlan
         initial={{ opacity: 0, y: 24, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.2, ease: "easeOut" }}
-        className="w-full max-w-lg rounded bg-white p-6 shadow-lifted sm:p-8"
+        className="w-full max-w-lg border-t-4 border-hardie-700 bg-white p-6 shadow-lifted sm:p-8"
       >
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="eyebrow">Save your plan</p>
             <h2
               id="save-plan-title"
-              className="mt-1 text-xl font-extrabold tracking-tight text-hardie-800"
+              className="mt-1.5 text-24p font-black tracking-tight text-slateCharcoal"
             >
               {saved ? "Your plan is downloading" : "Keep a copy of your specification"}
             </h2>
@@ -80,7 +80,7 @@ export function SavePlanModal({ plan, answers, paletteIndex, onClose }: SavePlan
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="rounded-full p-2 text-slateCharcoal-muted transition-colors hover:bg-stone-100 hover:text-slateCharcoal"
+            className="p-2 text-slateCharcoal-muted transition-colors hover:bg-stone-100 hover:text-slateCharcoal"
           >
             <Icon name="X" className="h-5 w-5" />
           </button>
@@ -88,7 +88,7 @@ export function SavePlanModal({ plan, answers, paletteIndex, onClose }: SavePlan
 
         {saved ? (
           <div className="mt-5">
-            <div className="flex gap-3 border-l-2 border-hardie-500 bg-stone-100 p-4">
+            <div className="flex gap-3 border-l-[3px] border-hardie-700 bg-stone-200 p-4">
               <Icon name="Check" className="mt-0.5 h-5 w-5 shrink-0 text-hardie-700" />
               <p className="text-[13px] leading-relaxed text-hardie-800">
                 A plain-text copy of your full plan has been saved to your device. Forward it to
@@ -128,7 +128,7 @@ export function SavePlanModal({ plan, answers, paletteIndex, onClose }: SavePlan
               }}
               placeholder="you@example.com"
               aria-invalid={touched && !valid}
-              className="mt-2 w-full rounded border border-stone-300 bg-white px-4 py-3 text-[15px] text-slateCharcoal placeholder:text-stone-400 focus:border-hardie-500"
+              className="mt-2 w-full rounded-none border border-stone-400 bg-white px-4 py-3 text-[15px] text-slateCharcoal placeholder:text-stone-400 focus:border-hardie-500"
             />
             {touched && !valid ? (
               <p className="mt-2 text-[13px] font-medium text-red-700">
