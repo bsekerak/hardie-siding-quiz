@@ -80,7 +80,7 @@ export default function HomePage() {
                 <CtaArrow />
               </ButtonLink>
               <span className="text-sm font-medium text-slateCharcoal-muted">
-                About 4 minutes · No account · Nothing leaves your browser
+                About 4 minutes · No account · Then see it on your house
               </span>
             </div>
 

@@ -107,9 +107,10 @@ export function SavePlanModal({ plan, answers, paletteIndex, onClose }: SavePlan
         ) : (
           <div className="mt-5">
             <p className="text-[13px] leading-relaxed text-slateCharcoal-muted">
-              This tool runs entirely in your browser — there is no server behind it, so nothing is
-              transmitted anywhere. Your email is stored locally only, and your plan downloads
-              directly to this device as a text file you can forward to contractors.
+              Your plan is built entirely in your browser — your answers, your email and your
+              specification never leave this device, and the file downloads directly to it. The one
+              exception is the visualizer: photos you upload there are sent to OpenAI to render the
+              image, and are not stored by this tool.
             </p>
 
             <label htmlFor="plan-email" className="mt-5 block text-sm font-semibold text-slateCharcoal">
