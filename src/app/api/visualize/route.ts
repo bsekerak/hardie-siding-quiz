@@ -4,7 +4,7 @@ import sharp from "sharp";
 import { buildInpaintPrompt, type LandscapingMode } from "@/lib/visualizerPrompt";
 import { InpaintBillingError, InpaintNotConfiguredError, inpaintSiding } from "@/lib/inpaint";
 import { BUILD_ID } from "@/lib/buildId";
-import { buildMask, compositeOntoOriginal, detectFacadeRegions } from "@/lib/facadeMask";
+import { buildMask, compositeOntoOriginal, detectFacadeGrid } from "@/lib/facadeMask";
 import type { Palette, SidingPlan } from "@/types/quiz";
 
 export const runtime = "nodejs";
@@ -134,8 +134,8 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(await upload.arrayBuffer());
     const prepared = await prepareImage(buffer);
 
-    const regions = await detectFacadeRegions(openai, prepared.png.toString("base64"));
-    if (!regions) {
+    const grid = await detectFacadeGrid(openai, prepared.png.toString("base64"));
+    if (!grid) {
       return NextResponse.json(
         {
           error:
@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
     }
 
     const growDown = landscaping === "clear" ? 9 : 1.5;
-    const mask = await buildMask(regions, prepared.width, prepared.height, growDown);
+    const mask = await buildMask(grid, prepared.width, prepared.height, growDown);
 
     let prompt = buildInpaintPrompt(plan, palette, landscaping);
     if (instruction) prompt = `${prompt}. ${instruction}`;
@@ -182,7 +182,8 @@ export async function POST(request: NextRequest) {
             maskUrl: `data:image/png;base64,${mask.replicateMask.toString("base64")}`,
             rawUrl: `data:image/png;base64,${generated.toString("base64")}`,
             preparedUrl: `data:image/png;base64,${prepared.png.toString("base64")}`,
-            wallPoints: regions.wall.length,
+            wallCells: grid.cells.filter(Boolean).length,
+            gridTotal: grid.cells.length,
             prompt,
           }
         : {}),
@@ -190,7 +191,7 @@ export async function POST(request: NextRequest) {
       shape: prepared.shape,
       masked: true,
       composited,
-      openingCount: regions.openings.length,
+      openingCount: grid.openings.length,
       buildId: BUILD_ID,
     });
   } catch (error) {

@@ -1,13 +1,6 @@
 import OpenAI from "openai";
 import sharp from "sharp";
 
-export interface PolygonPoint {
-  /** Percentage of image width, 0-100. */
-  x: number;
-  /** Percentage of image height, 0-100. */
-  y: number;
-}
-
 /** A rectangle, in percentage space, that must be preserved untouched. */
 export interface Opening {
   x: number;
@@ -16,21 +9,36 @@ export interface Opening {
   h: number;
 }
 
-export interface FacadeRegions {
-  wall: PolygonPoint[];
-  openings: Opening[];
-}
-
 /**
  * gpt-image-1 only regenerates the TRANSPARENT region of a mask and copies the
  * opaque region through untouched. Masking the house means the lawn, walkway,
  * driveway, planting beds and sky survive byte-for-byte instead of being
  * re-imagined on every render.
  */
-export async function detectFacadeRegions(
+const GRID_COLS = 56;
+const GRID_ROWS = 36;
+
+export interface FacadeGrid {
+  /** Row-major occupancy: true where the cell is siding to be repainted. */
+  cells: boolean[];
+  cols: number;
+  rows: number;
+  openings: Opening[];
+}
+
+/**
+ * Asks for a grid occupancy map rather than a polygon.
+ *
+ * Vertex lists are where this falls down: asked for a 20-40 point silhouette,
+ * GPT-4o returns 5-8 points — a bounding box that sweeps in sky, roof and lawn,
+ * which then tells the inpainting model to repaint the whole photo. Classifying
+ * a coarse grid is a task vision models are genuinely good at, and it degrades
+ * gracefully: a few wrong cells cost a few pixels, not the whole frame.
+ */
+export async function detectFacadeGrid(
   openai: OpenAI,
   imageBase64: string,
-): Promise<FacadeRegions | null> {
+): Promise<FacadeGrid | null> {
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -42,82 +50,77 @@ export async function detectFacadeRegions(
             {
               type: "text",
               text:
-                "Analyse this house photo and return TWO things as JSON.\n\n" +
-                "1. \"wall\": a TIGHT silhouette of the SIDED WALL SURFACES — the flat cladding " +
-                "including gable triangles. Trace the actual outline step by step: up the left " +
-                "corner of the house, along each roof edge and soffit (following every gable peak " +
-                "and every change in roof height separately), down the right corner, and back " +
-                "along the base of the wall where it meets the ground or foundation.\n" +
-                "This must NOT be a bounding box. Sky must be OUTSIDE the shape. Roof shingles " +
-                "must be OUTSIDE the shape. Lawn, beds, shrubs, trees, walkway and driveway must " +
-                "be OUTSIDE the shape. If the roofline steps down over a garage wing, the outline " +
-                "must step down with it.\n" +
-                "Use 20 to 40 points ordered clockwise — more points along the roofline than " +
-                "anywhere else, because that edge is where accuracy matters most.\n\n" +
-                "2. \"openings\": a tight bounding rectangle around EVERY window (including its " +
-                "shutters and grilles), every door, every garage door, every gable louver or vent, " +
-                "and every exterior light fixture. Be generous rather than tight — it is better to " +
-                "cover slightly too much than to clip an edge. Include every one you can see.\n\n" +
-                'Return ONLY: {"wall":[{"x":12.5,"y":40.1},...],' +
-                '"openings":[{"x":30.2,"y":45.0,"w":6.1,"h":9.4},...]} ' +
-                "where all values are percentages of image width/height between 0 and 100, and " +
-                "x,y is the top-left corner of each rectangle. No prose, no code fences.",
+                `Overlay a ${GRID_COLS} x ${GRID_ROWS} grid on this house photo ` +
+                `(${GRID_COLS} columns across, ${GRID_ROWS} rows down).\n\n` +
+                `Output exactly ${GRID_ROWS} lines of exactly ${GRID_COLS} characters.\n` +
+                "Use '#' when the MAJORITY of that cell is flat exterior wall cladding — " +
+                "siding boards, shingle siding, board-and-batten, or a sided gable face.\n" +
+                "Use '.' for everything else: sky, roof shingles, gutters, windows, doors, " +
+                "garage doors, gable vents, light fixtures, porch columns, chimney, lawn, " +
+                "planting beds, shrubs, trees, walkway, driveway, cars and people.\n\n" +
+                "Be conservative: if a cell is ambiguous or sits on a boundary, use '.'.\n" +
+                "Then output a line containing only ---\n" +
+                "Then output a JSON array of bounding rectangles for every window (including " +
+                "shutters), door, garage door, gable vent and light fixture, as " +
+                '[{"x":30.2,"y":45.0,"w":6.1,"h":9.4},...] in percentages of width and height.\n' +
+                "No prose, no code fences, no row numbers.",
             },
           ],
         },
       ],
-      max_tokens: 2000,
+      max_tokens: 4000,
     });
 
     const raw = response.choices[0]?.message?.content ?? "";
-    const match = raw.match(/\{[\s\S]*\}/);
-    if (!match) return null;
+    const [gridPart, jsonPart] = raw.split("---");
+    if (!gridPart) return null;
 
-    const parsed: unknown = JSON.parse(match[0]);
-    if (typeof parsed !== "object" || parsed === null) return null;
+    const lines = gridPart
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0 && /^[#.\s]+$/.test(line));
+    if (lines.length < GRID_ROWS * 0.6) return null;
 
-    const wallRaw = (parsed as { wall?: unknown }).wall;
-    if (!Array.isArray(wallRaw) || wallRaw.length < 3) return null;
+    const cells: boolean[] = [];
+    for (let row = 0; row < GRID_ROWS; row += 1) {
+      const line = lines[Math.min(row, lines.length - 1)] ?? "";
+      for (let col = 0; col < GRID_COLS; col += 1) {
+        cells.push(line[col] === "#");
+      }
+    }
+    if (!cells.some(Boolean)) return null;
 
     const clamp = (value: number): number => Math.min(100, Math.max(0, value));
-
-    const wall: PolygonPoint[] = [];
-    for (const point of wallRaw) {
-      if (typeof point !== "object" || point === null) continue;
-      const { x, y } = point as { x?: unknown; y?: unknown };
-      if (typeof x !== "number" || typeof y !== "number") continue;
-      if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
-      wall.push({ x: clamp(x), y: clamp(y) });
-    }
-    if (wall.length < 3) return null;
-
-    const openingsRaw = (parsed as { openings?: unknown }).openings;
     const openings: Opening[] = [];
-    if (Array.isArray(openingsRaw)) {
-      for (const rect of openingsRaw) {
-        if (typeof rect !== "object" || rect === null) continue;
-        const { x, y, w, h } = rect as { x?: unknown; y?: unknown; w?: unknown; h?: unknown };
-        if ([x, y, w, h].some((v) => typeof v !== "number" || !Number.isFinite(v))) continue;
-        const rx = clamp(x as number);
-        const ry = clamp(y as number);
-        const rw = Math.min(100 - rx, Math.max(0, w as number));
-        const rh = Math.min(100 - ry, Math.max(0, h as number));
-        if (rw <= 0 || rh <= 0) continue;
-        openings.push({ x: rx, y: ry, w: rw, h: rh });
+    if (jsonPart) {
+      const match = jsonPart.match(/\[[\s\S]*\]/);
+      if (match) {
+        try {
+          const parsed: unknown = JSON.parse(match[0]);
+          if (Array.isArray(parsed)) {
+            for (const rect of parsed) {
+              if (typeof rect !== "object" || rect === null) continue;
+              const { x, y, w, h } = rect as Record<string, unknown>;
+              if ([x, y, w, h].some((v) => typeof v !== "number" || !Number.isFinite(v))) continue;
+              const rx = clamp(x as number);
+              const ry = clamp(y as number);
+              const rw = Math.min(100 - rx, Math.max(0, w as number));
+              const rh = Math.min(100 - ry, Math.max(0, h as number));
+              if (rw > 0 && rh > 0) openings.push({ x: rx, y: ry, w: rw, h: rh });
+            }
+          }
+        } catch {
+          // Openings are an optimisation; a grid without them still works.
+        }
       }
     }
 
-    return { wall, openings };
+    return { cells, cols: GRID_COLS, rows: GRID_ROWS, openings };
   } catch {
     return null;
   }
 }
 
-/**
- * Builds an RGBA mask: the polygon becomes transparent (editable), everything
- * else stays opaque (preserved). `growDownPercent` extends the editable region
- * below the wall line so foundation beds can be cleared when asked.
- */
 export interface MaskAssets {
   /** RGBA PNG in OpenAI convention: transparent where editing is allowed. */
   apiMask: Buffer;
@@ -135,31 +138,32 @@ export interface MaskAssets {
 }
 
 export async function buildMask(
-  regions: FacadeRegions,
+  grid: FacadeGrid,
   width: number,
   height: number,
   growDownPercent: number,
 ): Promise<MaskAssets> {
-  const { wall, openings } = regions;
+  const cellW = width / grid.cols;
+  const cellH = height / grid.rows;
   const grow = (growDownPercent / 100) * height;
-  const centroidY = wall.reduce((sum, p) => sum + p.y, 0) / wall.length;
 
-  const coords = wall
-    .map((point) => {
-      const px = (point.x / 100) * width;
-      // Push only the lower half of the outline downward, so the roofline is
-      // untouched while the base of the wall extends over the beds.
-      const isLower = point.y > centroidY;
-      const py = Math.min(height, (point.y / 100) * height + (isLower ? grow : 0));
-      return `${px.toFixed(1)},${py.toFixed(1)}`;
-    })
-    .join(" ");
+  // Each occupied cell becomes a rectangle; adjacent cells merge visually into
+  // one region once the whole thing is blurred.
+  const cellRects: string[] = [];
+  for (let row = 0; row < grid.rows; row += 1) {
+    for (let col = 0; col < grid.cols; col += 1) {
+      if (!grid.cells[row * grid.cols + col]) continue;
+      const x = col * cellW;
+      const y = row * cellH;
+      // Overlap by a hair so neighbouring cells do not leave seams.
+      cellRects.push(
+        `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${(cellW + 1).toFixed(1)}" height="${(cellH + 1 + grow).toFixed(1)}" fill="white"/>`,
+      );
+    }
+  }
 
-  // Windows, doors, vents and light fixtures are painted back to black so they
-  // fall outside the editable region and survive the edit untouched. A small
-  // outward pad absorbs imprecision in the detected rectangle.
   const pad = 0.6;
-  const holes = openings
+  const holes = grid.openings
     .map((rect) => {
       const rx = Math.max(0, ((rect.x - pad) / 100) * width);
       const ry = Math.max(0, ((rect.y - pad) / 100) * height);
@@ -171,22 +175,18 @@ export async function buildMask(
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
     <rect width="${width}" height="${height}" fill="black"/>
-    <polygon points="${coords}" fill="white"/>
+    ${cellRects.join("")}
     ${holes}
   </svg>`;
 
-  // 255 inside the editable region, 0 outside. Feathered so the composite seam
-  // does not show as a hard edge along the wall line.
+  const replicateMask = await sharp(Buffer.from(svg)).greyscale().blur(2).png().toBuffer();
+
   const compositeAlpha = await sharp(Buffer.from(svg))
     .greyscale()
-    .blur(1.5)
+    .blur(2.5)
     .raw()
     .toBuffer();
 
-  // Flux Fill takes the mask as a plain greyscale image: white = repaint.
-  const replicateMask = await sharp(Buffer.from(svg)).greyscale().png().toBuffer();
-
-  // OpenAI wants the inverse convention: transparent means "you may edit".
   const apiAlpha = await sharp(Buffer.from(svg)).greyscale().negate().raw().toBuffer();
 
   const base = await sharp({
