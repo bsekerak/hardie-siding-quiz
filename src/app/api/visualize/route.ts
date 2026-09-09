@@ -172,7 +172,20 @@ export async function POST(request: NextRequest) {
       console.error("[/api/visualize] composite failed", compositeError);
     }
 
+    // ?debug=1 returns the intermediate artefacts so a bad mask or a no-op
+    // generation can be told apart without guessing.
+    const debug = request.nextUrl.searchParams.get("debug") === "1";
+
     return NextResponse.json({
+      ...(debug
+        ? {
+            maskUrl: `data:image/png;base64,${mask.replicateMask.toString("base64")}`,
+            rawUrl: `data:image/png;base64,${generated.toString("base64")}`,
+            preparedUrl: `data:image/png;base64,${prepared.png.toString("base64")}`,
+            wallPoints: regions.wall.length,
+            prompt,
+          }
+        : {}),
       imageUrl: `data:image/png;base64,${finalPng.toString("base64")}`,
       shape: prepared.shape,
       masked: true,
