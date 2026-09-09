@@ -7,6 +7,7 @@ import {
   type LandscapingMode,
 } from "@/lib/visualizerPrompt";
 import { BUILD_ID } from "@/lib/buildId";
+import { buildMask, detectFacadePolygon } from "@/lib/facadeMask";
 import type { Palette, SidingPlan } from "@/types/quiz";
 
 export const runtime = "nodejs";
@@ -41,7 +42,13 @@ function shapeFor(width: number, height: number): OutputShape {
  */
 async function prepareImage(
   buffer: Buffer,
-): Promise<{ file: Awaited<ReturnType<typeof toFile>>; shape: OutputShape }> {
+): Promise<{
+  file: Awaited<ReturnType<typeof toFile>>;
+  shape: OutputShape;
+  png: Buffer;
+  width: number;
+  height: number;
+}> {
   const rotated = await sharp(buffer).rotate().toBuffer();
   const metadata = await sharp(rotated).metadata();
   const shape = shapeFor(metadata.width ?? 1024, metadata.height ?? 1024);
@@ -58,7 +65,7 @@ async function prepareImage(
   const file = await toFile(new Blob([new Uint8Array(png)], { type: "image/png" }), "house.png", {
     type: "image/png",
   });
-  return { file, shape };
+  return { file, shape, png, width: target.w, height: target.h };
 }
 
 async function fileFromDataUrl(dataUrl: string): Promise<Awaited<ReturnType<typeof toFile>>> {
@@ -118,8 +125,10 @@ export async function POST(request: NextRequest) {
 
   try {
     let imageFile: Awaited<ReturnType<typeof toFile>>;
+    let maskFile: Awaited<ReturnType<typeof toFile>> | undefined;
     let prompt: string;
     let shape: OutputShape = "square";
+    let masked = false;
 
     if (mode === "refine") {
       const current = formData.get("currentImage");
@@ -153,6 +162,20 @@ export async function POST(request: NextRequest) {
         ? "clear"
         : "keep") as LandscapingMode;
       prompt = buildSidingPrompt(plan, palette, landscaping);
+
+      // Confine the edit to the house itself. Without this the model regenerates
+      // the whole frame and quietly redraws the walkway, beds and massing.
+      const polygon = await detectFacadePolygon(openai, prepared.png.toString("base64"));
+      if (polygon) {
+        // Clearing the beds needs a little room below the wall line; keeping
+        // them means touching nothing outside the structure at all.
+        const growDown = landscaping === "clear" ? 9 : 1.5;
+        const mask = await buildMask(polygon, prepared.width, prepared.height, growDown);
+        maskFile = await toFile(new Blob([new Uint8Array(mask)], { type: "image/png" }), "mask.png", {
+          type: "image/png",
+        });
+        masked = true;
+      }
     }
 
     // No mask: siding covers most of the facade, and a bad mask damages the
@@ -160,6 +183,7 @@ export async function POST(request: NextRequest) {
     const response = await openai.images.edit({
       model: "gpt-image-1",
       image: imageFile,
+      ...(maskFile ? { mask: maskFile } : {}),
       prompt,
       n: 1,
       size: OUTPUT_SIZES[shape].api,
@@ -173,7 +197,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No image came back. Try again." }, { status: 502 });
     }
 
-    return NextResponse.json({ imageUrl: `data:image/png;base64,${b64}`, shape, buildId: BUILD_ID });
+    return NextResponse.json({ imageUrl: `data:image/png;base64,${b64}`, shape, masked, buildId: BUILD_ID });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "The visualizer failed. Try again.";
