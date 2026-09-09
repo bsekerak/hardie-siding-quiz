@@ -1,3 +1,5 @@
+import sharp from "sharp";
+
 /**
  * Text-prompted segmentation on Replicate.
  *
@@ -105,4 +107,40 @@ export async function probeSegmentation(imagePng: Buffer): Promise<SegmentAttemp
   }
 
   return attempts;
+}
+
+/**
+ * Produces the wall mask as a single-channel alpha sized to the render frame:
+ * 255 where the cladding is, 0 everywhere else.
+ *
+ * This replaces asking GPT-4o for a polygon or a grid. A segmentation model
+ * traces the roofline, eaves and openings accurately; a language model returns
+ * a bounding box however the request is worded.
+ */
+export async function segmentWallMask(
+  imagePng: Buffer,
+  width: number,
+  height: number,
+): Promise<Buffer | null> {
+  const attempts = await probeSegmentation(imagePng);
+  const hit = attempts.find((attempt) => attempt.maskBase64);
+  if (!hit?.maskBase64) return null;
+
+  const raw = Buffer.from(hit.maskBase64, "base64");
+
+  // Polarity is not guaranteed across models, so infer it: the selected wall is
+  // always the minority of the frame, so whichever tone is rarer is the wall.
+  const stats = await sharp(raw).greyscale().stats();
+  const mean = stats.channels[0]?.mean ?? 127;
+  const needsInvert = mean > 127;
+
+  let pipeline = sharp(raw).greyscale();
+  if (needsInvert) pipeline = pipeline.negate();
+
+  return pipeline
+    .resize(width, height, { fit: "fill" })
+    // Soften the edge just enough that the recolour boundary is not a hard line.
+    .blur(1.2)
+    .raw()
+    .toBuffer();
 }
