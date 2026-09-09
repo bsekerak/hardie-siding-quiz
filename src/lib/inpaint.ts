@@ -31,31 +31,76 @@ function toDataUri(png: Buffer): string {
   return `data:image/png;base64,${png.toString("base64")}`;
 }
 
-/** Replicate's SDK returns a URL string, an array of them, or a FileOutput. */
-async function readOutput(output: unknown): Promise<Buffer> {
-  const first = Array.isArray(output) ? output[0] : output;
+/**
+ * Replicate's SDK has returned several shapes across versions: a URL string, an
+ * array of them, a FileOutput (a ReadableStream carrying .url()/.blob()), or an
+ * object wrapping one of those. Handle them all, and if something new turns up,
+ * say what it was rather than "no image".
+ */
+async function streamToBuffer(stream: ReadableStream<Uint8Array>): Promise<Buffer> {
+  const reader = stream.getReader();
+  const chunks: Uint8Array[] = [];
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    if (value) chunks.push(value);
+  }
+  return Buffer.concat(chunks);
+}
 
-  if (typeof first === "string") {
-    const response = await fetch(first);
-    if (!response.ok) throw new Error(`Could not download the render (${response.status}).`);
-    return Buffer.from(await response.arrayBuffer());
+async function download(url: string): Promise<Buffer> {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Could not download the render (${response.status}).`);
+  return Buffer.from(await response.arrayBuffer());
+}
+
+async function readOutput(output: unknown, depth = 0): Promise<Buffer> {
+  if (depth > 3) throw new Error("The inpainting model returned an unreadable result.");
+
+  if (typeof output === "string") {
+    if (output.startsWith("data:")) {
+      return Buffer.from(output.slice(output.indexOf(",") + 1), "base64");
+    }
+    return download(output);
   }
 
-  if (first && typeof first === "object") {
-    const candidate = first as { url?: () => URL | string; blob?: () => Promise<Blob> };
+  if (Array.isArray(output)) {
+    if (output.length === 0) throw new Error("The inpainting model returned an empty result.");
+    return readOutput(output[0], depth + 1);
+  }
+
+  if (output && typeof output === "object") {
+    const candidate = output as {
+      blob?: () => Promise<Blob>;
+      url?: (() => URL | string) | string;
+      getReader?: unknown;
+      output?: unknown;
+      image?: unknown;
+      mask?: unknown;
+    };
+
     if (typeof candidate.blob === "function") {
       const blob = await candidate.blob();
       return Buffer.from(await blob.arrayBuffer());
     }
     if (typeof candidate.url === "function") {
       const url = candidate.url();
-      const response = await fetch(typeof url === "string" ? url : url.toString());
-      if (!response.ok) throw new Error(`Could not download the render (${response.status}).`);
-      return Buffer.from(await response.arrayBuffer());
+      return download(typeof url === "string" ? url : url.toString());
     }
+    if (typeof candidate.url === "string") {
+      return download(candidate.url);
+    }
+    if (typeof candidate.getReader === "function") {
+      return streamToBuffer(output as ReadableStream<Uint8Array>);
+    }
+    if (candidate.output !== undefined) return readOutput(candidate.output, depth + 1);
+    if (candidate.image !== undefined) return readOutput(candidate.image, depth + 1);
+
+    const keys = Object.keys(candidate).slice(0, 8).join(", ");
+    throw new Error(`The inpainting model returned an unexpected shape (keys: ${keys || "none"}).`);
   }
 
-  throw new Error("The inpainting model returned no image.");
+  throw new Error(`The inpainting model returned ${typeof output}.`);
 }
 
 export async function inpaintSiding(
