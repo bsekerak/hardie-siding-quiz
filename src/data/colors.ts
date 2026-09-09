@@ -85,6 +85,65 @@ export function contrastRatio(hexA: string, hexB: string): number {
   return (light + 0.05) / (dark + 0.05);
 }
 
+/**
+ * Turns a hex value into words an image model can actually act on. Passing a
+ * hex code alone gets loose adherence — naming the hue, value and saturation
+ * lands far closer to the real ColorPlus chip.
+ */
+export function describeColor(swatch: HardieColor): string {
+  const clean = swatch.hex.replace("#", "");
+  const r = Number.parseInt(clean.slice(0, 2), 16) / 255;
+  const g = Number.parseInt(clean.slice(2, 4), 16) / 255;
+  const b = Number.parseInt(clean.slice(4, 6), 16) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const delta = max - min;
+  const lightness = (max + min) / 2;
+  const saturation = delta === 0 ? 0 : delta / (1 - Math.abs(2 * lightness - 1));
+
+  let hue = 0;
+  if (delta !== 0) {
+    if (max === r) hue = ((g - b) / delta) % 6;
+    else if (max === g) hue = (b - r) / delta + 2;
+    else hue = (r - g) / delta + 4;
+    hue = (hue * 60 + 360) % 360;
+  }
+
+  const value =
+    swatch.lightness >= 82
+      ? "very light"
+      : swatch.lightness >= 62
+        ? "light"
+        : swatch.lightness >= 42
+          ? "mid-tone"
+          : swatch.lightness >= 24
+            ? "deep"
+            : "very dark";
+
+  // Near-white and near-black read badly through the hue machinery above.
+  if (swatch.lightness >= 88) return "a soft, clean off-white with a barely perceptible warm cast";
+  if (swatch.lightness <= 18) return "a near-black charcoal, only just short of true black";
+
+  if (saturation < 0.06) {
+    return `${value} neutral ${swatch.lightness > 55 ? "off-white" : "gray"}, essentially unsaturated`;
+  }
+
+  let hueName: string;
+  if (hue < 16 || hue >= 345) hueName = "red";
+  else if (hue < 40) hueName = "warm brown-orange";
+  else if (hue < 62) hueName = "tan-brown";
+  else if (hue < 82) hueName = "olive";
+  else if (hue < 160) hueName = "sage green";
+  else if (hue < 200) hueName = "teal";
+  else if (hue < 250) hueName = "blue";
+  else hueName = "violet-blue";
+
+  const intensity =
+    saturation < 0.14 ? "heavily muted, almost gray" : saturation < 0.3 ? "muted, desaturated" : "moderately saturated";
+
+  return `${value} ${hueName}, ${intensity}`;
+}
+
 export function readableTextOn(hex: string): string {
   return luminance(hex) > 0.45 ? "#1E293B" : "#FFFFFF";
 }

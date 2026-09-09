@@ -89,6 +89,7 @@ export function Visualizer() {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [stage, setStage] = useState<Stage>("setup");
   const [result, setResult] = useState<string | null>(null);
+  const [shape, setShape] = useState<string>("square");
   const [error, setError] = useState<string | null>(null);
   const [busyLabel, setBusyLabel] = useState<string>("");
   const fileInput = useRef<HTMLInputElement>(null);
@@ -179,6 +180,7 @@ export function Visualizer() {
       }
       body.set("currentImage", result);
       body.set("instruction", instruction);
+      body.set("shape", shape);
     }
 
     try {
@@ -187,10 +189,10 @@ export function Visualizer() {
       // A platform-level rejection (payload too large, gateway timeout) comes
       // back as plain text, so parsing it as JSON would throw and get reported
       // as a connection failure — which it isn't.
-      let data: { imageUrl?: string; error?: string } = {};
+      let data: { imageUrl?: string; error?: string; shape?: string } = {};
       const contentType = response.headers.get("content-type") ?? "";
       if (contentType.includes("application/json")) {
-        data = (await response.json()) as { imageUrl?: string; error?: string };
+        data = (await response.json()) as { imageUrl?: string; error?: string; shape?: string };
       } else {
         const text = await response.text();
         data = {
@@ -207,6 +209,7 @@ export function Visualizer() {
         return;
       }
       setResult(data.imageUrl);
+      if (typeof data.shape === "string") setShape(data.shape);
       setStage("done");
     } catch (fetchError) {
       const detail = fetchError instanceof Error ? ` (${fetchError.message})` : "";
@@ -251,40 +254,59 @@ export function Visualizer() {
 
             <section>
               <p className="spec-label mb-3">2 — Landscaping</p>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={landscaping === "keep"}
-                onClick={() => setLandscaping((v) => (v === "keep" ? "clear" : "keep"))}
-                className="flex w-full items-center justify-between gap-4 border border-stone-300 bg-white p-4 text-left transition-colors hover:border-slateCharcoal"
-              >
-                <span>
-                  <span className="block text-[14px] font-bold tracking-tight text-slateCharcoal">
-                    {landscaping === "keep" ? "Keep it as it looks" : "Clear it back"}
-                  </span>
-                  <span className="mt-1 block text-[12px] leading-snug text-slateCharcoal-muted">
-                    {landscaping === "keep"
-                      ? "Shrubs, beds and trees stay exactly as they are"
-                      : "Foundation plantings removed so the siding is fully visible"}
-                  </span>
-                </span>
-                <span
-                  aria-hidden="true"
-                  className={cn(
-                    "flex h-6 w-11 shrink-0 items-center border-2 p-0.5 transition-colors",
-                    landscaping === "keep"
-                      ? "justify-end border-hardie-500 bg-hardie-500"
-                      : "justify-start border-stone-400 bg-white",
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "h-4 w-4",
-                      landscaping === "keep" ? "bg-white" : "bg-stone-400",
-                    )}
-                  />
-                </span>
-              </button>
+              <div className="grid gap-2.5">
+                {(
+                  [
+                    {
+                      value: "keep" as const,
+                      title: "Keep it as it looks",
+                      body: "Shrubs, beds, boulders and trees stay exactly where they are",
+                    },
+                    {
+                      value: "clear" as const,
+                      title: "Clear it back",
+                      body: "Plantings and edging stones removed so the siding reads roofline to grade",
+                    },
+                  ]
+                ).map((option) => {
+                  const active = landscaping === option.value;
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      role="radio"
+                      aria-checked={active}
+                      onClick={() => setLandscaping(option.value)}
+                      className={cn(
+                        "relative rounded-none p-4 text-left transition-colors",
+                        active
+                          ? "border-2 border-hardie-500 bg-hardie-50"
+                          : "border border-stone-300 bg-white hover:border-slateCharcoal",
+                      )}
+                    >
+                      {active ? (
+                        <span
+                          aria-hidden="true"
+                          className="absolute right-0 top-0 flex h-6 w-6 items-center justify-center bg-hardie-500 text-white"
+                        >
+                          <Icon name="Check" className="h-3.5 w-3.5" strokeWidth={3} />
+                        </span>
+                      ) : null}
+                      <span
+                        className={cn(
+                          "block pr-6 text-[14px] font-bold tracking-tight",
+                          active ? "text-hardie-700" : "text-slateCharcoal",
+                        )}
+                      >
+                        {option.title}
+                      </span>
+                      <span className="mt-1 block text-[12px] leading-snug text-slateCharcoal-muted">
+                        {option.body}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </section>
 
             <section>

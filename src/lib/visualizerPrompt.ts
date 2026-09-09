@@ -1,3 +1,4 @@
+import { describeColor } from "@/data/colors";
 import type { Palette, SidingPlan } from "@/types/quiz";
 
 export const QUICK_ADJUSTMENTS: ReadonlyArray<{ label: string; instruction: string }> = [
@@ -39,7 +40,7 @@ export type LandscapingMode = "keep" | "clear";
 function landscapingClause(mode: LandscapingMode): string {
   return mode === "keep"
     ? "LANDSCAPING: Preserve all existing landscaping exactly as it appears — every shrub, tree, planting bed, mulch, lawn, walkway, driveway and hardscape element must stay in place, unchanged in size, shape and position. Do NOT invent or add any landscaping, plants, shrubs, beds, walkways or hardscape that is not already visible in the photo. If an area is bare, leave it bare. "
-    : "LANDSCAPING: Remove the shrubs and foundation plantings directly against the house so the siding is fully visible from the roofline down to grade. Replace them with clean, level mulch beds and tidy lawn. Keep trees, walkways, driveway and all hardscape exactly as they are, and do not add any new plantings or features. ";
+    : "LANDSCAPING: Remove EVERY shrub, bush, flower, planter, window box and foundation planting from against the house, so the wall is completely unobstructed and the siding is visible in one clean run from the roofline all the way down to grade. Replace all of it with flat, freshly-raked dark mulch. Also remove decorative boulders and edging stones along the bed. Keep the lawn, walkway, driveway, steps and mature background trees exactly as they are, and do not add any new plantings or features. ";
 }
 
 /**
@@ -63,7 +64,9 @@ export function buildSidingPrompt(
 
   prompt +=
     `SIDING: Install ${spec.primary.productLine} with a ${spec.primary.texture} texture, ` +
-    `${spec.primary.exposure}, in James Hardie ColorPlus "${body.name}" — a ${body.hex} tone. ` +
+    `${spec.primary.exposure}, in James Hardie ColorPlus "${body.name}". ` +
+    `That colour is ${describeColor(body)} — hex ${body.hex}. Match that description closely; ` +
+    `do not render it more saturated or more vivid than described. ` +
     `The courses must be straight, evenly spaced and consistent across the whole facade. `;
 
   if (spec.accent && spec.accentPlacement) {
@@ -74,11 +77,12 @@ export function buildSidingPrompt(
 
   prompt +=
     `TRIM: All corner boards, window and door casing, fascia and frieze boards in ` +
-    `"${trim.name}" (${trim.hex}). Corner boards read approximately 5.5 inches wide and window casing ` +
+    `"${trim.name}" — ${describeColor(trim)}, hex ${trim.hex}. ` +
+    `Corner boards read approximately 5.5 inches wide and window casing ` +
     `approximately 3.5 inches wide. Trim must be crisp, straight and consistent. `;
 
   prompt +=
-    `ACCENT: Paint the front door in "${accent.name}" (${accent.hex}). ` +
+    `ACCENT: Paint the front door in "${accent.name}" — ${describeColor(accent)}, hex ${accent.hex}. ` +
     `Use this accent color sparingly — the front door only, no more than about 10 percent of the visible facade. `;
 
   prompt += landscapingClause(landscaping);

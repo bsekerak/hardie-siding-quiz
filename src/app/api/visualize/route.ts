@@ -12,21 +12,52 @@ export const runtime = "nodejs";
 // Image edits routinely take 30-60s; the default serverless timeout is too short.
 export const maxDuration = 300;
 
-const SIZE = 1024;
+/** gpt-image-1 accepts these three shapes. Picking the one that matches the
+ *  photo is what stops a wide house being cropped into a square frame. */
+const OUTPUT_SIZES = {
+  square: { w: 1024, h: 1024, api: "1024x1024" },
+  landscape: { w: 1536, h: 1024, api: "1536x1024" },
+  portrait: { w: 1024, h: 1536, api: "1024x1536" },
+} as const;
+
+type OutputShape = keyof typeof OUTPUT_SIZES;
 // Vercel rejects bodies over ~4.5MB at the edge, so this guard sits just under
 // it. The client downscales before upload; this is the backstop.
 const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 
-/** Normalizes any upload to a square 1024px PNG, which is what gpt-image-1 wants. */
-async function toSquarePng(buffer: Buffer): Promise<Awaited<ReturnType<typeof toFile>>> {
-  const png = await sharp(buffer)
-    .rotate() // honour EXIF orientation before resizing
-    .resize(SIZE, SIZE, { fit: "cover", position: "centre" })
+function shapeFor(width: number, height: number): OutputShape {
+  const ratio = width / height;
+  if (ratio >= 1.2) return "landscape";
+  if (ratio <= 0.83) return "portrait";
+  return "square";
+}
+
+/**
+ * Fits the photo into the closest supported frame WITHOUT cropping. The old
+ * implementation used fit:"cover" against a fixed square, which silently cut
+ * the ends off any wide elevation — exactly the part of a house you most want
+ * to see re-clad.
+ */
+async function prepareImage(
+  buffer: Buffer,
+): Promise<{ file: Awaited<ReturnType<typeof toFile>>; shape: OutputShape }> {
+  const rotated = await sharp(buffer).rotate().toBuffer();
+  const metadata = await sharp(rotated).metadata();
+  const shape = shapeFor(metadata.width ?? 1024, metadata.height ?? 1024);
+  const target = OUTPUT_SIZES[shape];
+
+  const png = await sharp(rotated)
+    .resize(target.w, target.h, {
+      fit: "contain",
+      background: { r: 255, g: 255, b: 255, alpha: 1 },
+    })
     .png()
     .toBuffer();
-  return toFile(new Blob([new Uint8Array(png)], { type: "image/png" }), "house.png", {
+
+  const file = await toFile(new Blob([new Uint8Array(png)], { type: "image/png" }), "house.png", {
     type: "image/png",
   });
+  return { file, shape };
 }
 
 async function fileFromDataUrl(dataUrl: string): Promise<Awaited<ReturnType<typeof toFile>>> {
@@ -79,6 +110,7 @@ export async function POST(request: NextRequest) {
   try {
     let imageFile: Awaited<ReturnType<typeof toFile>>;
     let prompt: string;
+    let shape: OutputShape = "square";
 
     if (mode === "refine") {
       const current = formData.get("currentImage");
@@ -91,6 +123,8 @@ export async function POST(request: NextRequest) {
       }
       imageFile = await fileFromDataUrl(current);
       prompt = buildRefinementPrompt(plan, palette, instruction.trim());
+      const previous = String(formData.get("shape") ?? "square");
+      shape = previous === "landscape" || previous === "portrait" ? previous : "square";
     } else {
       const upload = formData.get("image");
       if (!(upload instanceof File)) {
@@ -103,7 +137,9 @@ export async function POST(request: NextRequest) {
         );
       }
       const buffer = Buffer.from(await upload.arrayBuffer());
-      imageFile = await toSquarePng(buffer);
+      const prepared = await prepareImage(buffer);
+      imageFile = prepared.file;
+      shape = prepared.shape;
       const landscaping = (String(formData.get("landscaping") ?? "keep") === "clear"
         ? "clear"
         : "keep") as LandscapingMode;
@@ -117,7 +153,7 @@ export async function POST(request: NextRequest) {
       image: imageFile,
       prompt,
       n: 1,
-      size: "1024x1024",
+      size: OUTPUT_SIZES[shape].api,
     });
 
     const b64 = response.data?.[0]?.b64_json;
@@ -125,7 +161,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No image came back. Try again." }, { status: 502 });
     }
 
-    return NextResponse.json({ imageUrl: `data:image/png;base64,${b64}` });
+    return NextResponse.json({ imageUrl: `data:image/png;base64,${b64}`, shape });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "The visualizer failed. Try again.";
