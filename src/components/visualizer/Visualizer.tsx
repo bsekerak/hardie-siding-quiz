@@ -11,7 +11,6 @@ import { BUILD_ID } from "@/lib/buildId";
 import { buildPlan } from "@/lib/engine";
 import { ImageDecodeError, downscaleImage, formatBytes } from "@/lib/downscale";
 import { decodePlan } from "@/lib/share";
-import { QUICK_ADJUSTMENTS, type LandscapingMode } from "@/lib/visualizerPrompt";
 import type { Palette } from "@/types/quiz";
 
 type Stage = "setup" | "working" | "done";
@@ -84,7 +83,6 @@ export function Visualizer() {
   const plan = useMemo(() => (complete ? buildPlan(answers) : null), [answers, complete]);
 
   const [tierIndex, setTierIndex] = useState<number>(shared?.paletteIndex ?? 0);
-  const [landscaping, setLandscaping] = useState<LandscapingMode>("keep");
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoNote, setPhotoNote] = useState<string | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -175,13 +173,12 @@ export function Visualizer() {
     }
   };
 
-  const run = async (mode: "initial" | "refine", instruction?: string): Promise<void> => {
+  const run = async (): Promise<void> => {
     setError(null);
     setStage("working");
-    setBusyLabel(mode === "initial" ? "Re-cladding your house…" : "Applying your change…");
+    setBusyLabel("Repainting your siding…");
 
     const body = new FormData();
-    body.set("mode", mode);
     body.set("plan", JSON.stringify(plan));
     body.set("palette", JSON.stringify(palette));
 
@@ -190,12 +187,7 @@ export function Visualizer() {
       setStage("setup");
       return;
     }
-    // Always send the original photo. Refinements are re-renders with an extra
-    // instruction rather than edits of the previous output, so repeated tweaks
-    // cannot compound drift.
     body.set("image", photo);
-    body.set("landscaping", landscaping);
-    if (mode === "refine" && instruction) body.set("instruction", instruction);
 
     try {
       const response = await fetch("/api/visualize", { method: "POST", body });
@@ -219,7 +211,7 @@ export function Visualizer() {
 
       if (!response.ok || !data.imageUrl) {
         setError(data.error ?? `The visualizer failed (${response.status}). Try again.`);
-        setStage(result ? "done" : "setup");
+        setStage("setup");
         return;
       }
       setResult(data.imageUrl);
@@ -228,7 +220,7 @@ export function Visualizer() {
     } catch (fetchError) {
       const detail = fetchError instanceof Error ? ` (${fetchError.message})` : "";
       setError(`Could not reach the visualizer${detail}. Check your connection and try again.`);
-      setStage(result ? "done" : "setup");
+      setStage("setup");
     }
   };
 
@@ -253,8 +245,9 @@ export function Visualizer() {
             See your plan on your own house
           </h1>
           <p className="mt-2.5 max-w-2xl text-[15px] leading-relaxed text-slateCharcoal-muted">
-            Upload a photo of your home and we&apos;ll re-clad it in{" "}
-            {plan.spec.primary.productLine} using the palette tier you select below.
+            Upload a photo of your home and we&apos;ll repaint the siding in your selected
+            ColorPlus® colour. Your windows, roof, trim, landscaping and everything else stay
+            exactly as photographed — nothing is generated, so nothing can be invented.
           </p>
         </header>
 
@@ -277,64 +270,7 @@ export function Visualizer() {
             </section>
 
             <section>
-              <p className="spec-label mb-3">2 — Landscaping</p>
-              <div className="grid gap-2.5">
-                {(
-                  [
-                    {
-                      value: "keep" as const,
-                      title: "Keep it as it looks",
-                      body: "Shrubs, beds, boulders and trees stay exactly where they are",
-                    },
-                    {
-                      value: "clear" as const,
-                      title: "Clear it back",
-                      body: "Plantings and edging stones removed so the siding reads roofline to grade",
-                    },
-                  ]
-                ).map((option) => {
-                  const active = landscaping === option.value;
-                  return (
-                    <button
-                      key={option.value}
-                      type="button"
-                      role="radio"
-                      aria-checked={active}
-                      onClick={() => setLandscaping(option.value)}
-                      className={cn(
-                        "relative rounded-none p-4 text-left transition-colors",
-                        active
-                          ? "border-2 border-hardie-500 bg-hardie-50"
-                          : "border border-stone-300 bg-white hover:border-slateCharcoal",
-                      )}
-                    >
-                      {active ? (
-                        <span
-                          aria-hidden="true"
-                          className="absolute right-0 top-0 flex h-6 w-6 items-center justify-center bg-hardie-500 text-white"
-                        >
-                          <Icon name="Check" className="h-3.5 w-3.5" strokeWidth={3} />
-                        </span>
-                      ) : null}
-                      <span
-                        className={cn(
-                          "block pr-6 text-[14px] font-bold tracking-tight",
-                          active ? "text-hardie-700" : "text-slateCharcoal",
-                        )}
-                      >
-                        {option.title}
-                      </span>
-                      <span className="mt-1 block text-[12px] leading-snug text-slateCharcoal-muted">
-                        {option.body}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </section>
-
-            <section>
-              <p className="spec-label mb-3">3 — Your house photo</p>
+              <p className="spec-label mb-3">2 — Your house photo</p>
               <input
                 ref={fileInput}
                 type="file"
@@ -370,9 +306,9 @@ export function Visualizer() {
               size="lg"
               className="w-full"
               disabled={!photo || working}
-              onClick={() => void run("initial")}
+              onClick={() => void run()}
             >
-              {working ? busyLabel : result ? "Re-render with this tier" : "Visualize my siding"}
+              {working ? busyLabel : result ? "Apply this tier" : "Visualize my siding"}
               {!working ? <CtaArrow /> : null}
             </Button>
 
@@ -393,7 +329,7 @@ export function Visualizer() {
                     {busyLabel}
                   </p>
                   <p className="mt-1.5 text-[12px] text-slateCharcoal-muted">
-                    This usually takes 30–60 seconds.
+                    Usually a few seconds, longer on the first run of the day.
                   </p>
                 </div>
               ) : result ? (
@@ -405,7 +341,7 @@ export function Visualizer() {
                     Your rendering appears here
                   </p>
                   <p className="mx-auto mt-2 max-w-xs text-[12px] leading-relaxed text-slateCharcoal-muted">
-                    Pick a tier, choose how landscaping should look, and upload a photo.
+                    Pick a palette tier and upload a photo of your house.
                   </p>
                 </div>
               )}
@@ -415,9 +351,10 @@ export function Visualizer() {
               <>
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border border-stone-300 bg-white p-4">
                   <p className="text-[12px] leading-snug text-slateCharcoal-muted">
-                    <span className="font-bold text-slateCharcoal">{palette.name}</span> ·{" "}
-                    {palette.body.color.name} body · {palette.trim.color.name} trim ·{" "}
-                    {palette.accent.color.name} door
+                    <span className="font-bold text-slateCharcoal">{palette.name}</span> — siding
+                    field repainted in {palette.body.color.name}. Trim and door are shown as they
+                    are today; your plan specifies {palette.trim.color.name} trim and{" "}
+                    {palette.accent.color.name} on the front door.
                   </p>
                   <a
                     href={result}
@@ -429,31 +366,16 @@ export function Visualizer() {
                   </a>
                 </div>
 
-                <section className="mt-4">
-                  <p className="spec-label mb-3">Refine it</p>
-                  <div className="flex flex-wrap gap-2">
-                    {QUICK_ADJUSTMENTS.map((adjustment) => (
-                      <button
-                        key={adjustment.label}
-                        type="button"
-                        onClick={() => void run("refine", adjustment.instruction)}
-                        className="border border-stone-300 bg-white px-3.5 py-2 text-[12px] font-bold tracking-tight text-slateCharcoal transition-colors hover:border-hardie-500 hover:text-hardie-700"
-                      >
-                        {adjustment.label}
-                      </button>
-                    ))}
-                  </div>
-                </section>
               </>
             ) : null}
 
             <div className="mt-5 border-l-[3px] border-stone-400 bg-stone-100 p-4">
               <p className="text-[12px] leading-relaxed text-slateCharcoal-muted">
-                Renderings are an AI approximation for design exploration — colors shift with
-                lighting and screen calibration, and the model can misread architectural details.
-                Confirm every color against a physical ColorPlus® sample on the actual wall before
-                ordering. Your photo is sent to OpenAI to produce the image and is not stored by
-                this tool.
+                The siding is recoloured from your own photograph, so the result carries your real
+                shadows and texture rather than a generated impression. Colour still shifts with
+                lighting and screen calibration — confirm against a physical ColorPlus® sample on
+                the actual wall before ordering. Your photo is sent to Replicate to detect the wall
+                area and is not stored by this tool.
               </p>
             </div>
           </div>

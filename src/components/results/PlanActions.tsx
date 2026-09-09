@@ -79,8 +79,8 @@ export function PlanActions({ plan, answers, paletteIndex }: PlanActionsProps) {
             See it on your own house
           </span>
           <span className="mt-2 block text-[13px] leading-relaxed text-stone-200">
-            Upload a photo and we&apos;ll re-clad your home in this specification. Switch between
-            your three palette tiers and choose whether the landscaping stays as it looks.
+            Upload a photo and we&apos;ll repaint the siding in your ColorPlus® colour. Your
+            windows, roof and landscaping stay exactly as photographed.
           </span>
         </span>
         <span aria-hidden="true" className="mt-1 text-2xl leading-none">
