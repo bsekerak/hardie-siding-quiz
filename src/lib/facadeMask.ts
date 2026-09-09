@@ -258,20 +258,45 @@ export async function recolorSiding(
   height: number,
 ): Promise<Buffer> {
   const clean = hex.replace("#", "");
-  const r = Number.parseInt(clean.slice(0, 2), 16);
-  const g = Number.parseInt(clean.slice(2, 4), 16);
-  const b = Number.parseInt(clean.slice(4, 6), 16);
+  const tr = Number.parseInt(clean.slice(0, 2), 16);
+  const tg = Number.parseInt(clean.slice(2, 4), 16);
+  const tb = Number.parseInt(clean.slice(4, 6), 16);
 
-  // Greyscale carries the modelling; tint supplies the chroma. Linear
-  // processing keeps the result from muddying in the midtones.
-  const tintedWall = await sharp(imagePng)
-    .greyscale()
-    .linear(1.06, -6)
-    .tint({ r, g, b })
+  const { data } = await sharp(imagePng)
     .removeAlpha()
-    .toBuffer();
+    .raw()
+    .toBuffer({ resolveWithObject: true });
 
-  const wallWithAlpha = await sharp(tintedWall)
+  const luminance = (r: number, g: number, b: number): number =>
+    0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+  // Mean brightness of the wall ONLY. Averaging the whole frame would drag the
+  // exposure toward sky and lawn and leave the wall too dark or too light.
+  let total = 0;
+  let count = 0;
+  for (let i = 0, p = 0; i < compositeAlpha.length; i += 1, p += 3) {
+    if ((compositeAlpha[i] ?? 0) < 32) continue;
+    total += luminance(data[p] ?? 0, data[p + 1] ?? 0, data[p + 2] ?? 0);
+    count += 1;
+  }
+  const meanL = count > 0 ? total / count : 128;
+
+  // Scale the target colour by each pixel's brightness relative to that mean.
+  // The wall therefore averages EXACTLY the ColorPlus value while keeping the
+  // real shading, board shadows and texture of the homeowner's own photo —
+  // which a luminance-preserving tint could not do, because it kept the old
+  // wall's brightness and washed a low-chroma colour out to grey.
+  const out = Buffer.allocUnsafe(data.length);
+  for (let i = 0, p = 0; i < compositeAlpha.length; i += 1, p += 3) {
+    const l = luminance(data[p] ?? 0, data[p + 1] ?? 0, data[p + 2] ?? 0);
+    // Compress the ratio a little so deep shadows do not crush to black.
+    const ratio = Math.min(1.7, Math.max(0.35, 0.25 + 0.75 * (l / (meanL || 1))));
+    out[p] = Math.min(255, Math.round(tr * ratio));
+    out[p + 1] = Math.min(255, Math.round(tg * ratio));
+    out[p + 2] = Math.min(255, Math.round(tb * ratio));
+  }
+
+  const wallWithAlpha = await sharp(out, { raw: { width, height, channels: 3 } })
     .joinChannel(compositeAlpha, { raw: { width, height, channels: 1 } })
     .png()
     .toBuffer();
