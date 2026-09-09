@@ -128,11 +128,32 @@ export async function segmentWallMask(
 
   const raw = Buffer.from(hit.maskBase64, "base64");
 
-  // Polarity is not guaranteed across models, so infer it: the selected wall is
-  // always the minority of the frame, so whichever tone is rarer is the wall.
-  const stats = await sharp(raw).greyscale().stats();
-  const mean = stats.channels[0]?.mean ?? 127;
-  const needsInvert = mean > 127;
+  // Polarity is not guaranteed across models or even across runs, and a global
+  // brightness test gets it wrong — it tinted the sky once. The border of a
+  // house photo is essentially always background, so read that instead: if the
+  // frame edge is bright, white means background and the mask needs inverting.
+  const probeSize = 256;
+  const small = await sharp(raw)
+    .greyscale()
+    .resize(probeSize, probeSize, { fit: "fill" })
+    .raw()
+    .toBuffer();
+
+  let borderTotal = 0;
+  let borderCount = 0;
+  for (let i = 0; i < probeSize; i += 1) {
+    for (const index of [
+      i, // top row
+      (probeSize - 1) * probeSize + i, // bottom row
+      i * probeSize, // left column
+      i * probeSize + (probeSize - 1), // right column
+    ]) {
+      borderTotal += small[index] ?? 0;
+      borderCount += 1;
+    }
+  }
+  const borderMean = borderCount ? borderTotal / borderCount : 0;
+  const needsInvert = borderMean > 127;
 
   let pipeline = sharp(raw).greyscale();
   if (needsInvert) pipeline = pipeline.negate();
