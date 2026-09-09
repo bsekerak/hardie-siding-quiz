@@ -120,3 +120,43 @@ export function buildRefinementPrompt(
     `the instruction asks for. Photorealistic, sharp focus, high quality.`
   );
 }
+
+
+/**
+ * Flux Fill only ever paints inside the mask, so the long "do not change the
+ * roof / windows / camera angle" list that gpt-image-1 needed is dead weight
+ * here. This prompt describes only what the cladding should become.
+ */
+export function buildInpaintPrompt(
+  plan: SidingPlan,
+  palette: Palette,
+  landscaping: LandscapingMode,
+): string {
+  const { spec } = plan;
+  const body = palette.body.color;
+  const trim = palette.trim.color;
+
+  const parts: string[] = [
+    `${spec.primary.productLine} fiber cement siding with ${spec.primary.texture} texture and ${spec.primary.exposure}`,
+    `painted James Hardie ColorPlus "${body.name}", ${describeColor(body)}, hex ${body.hex}`,
+    "perfectly straight and evenly spaced horizontal courses with clean shadow lines",
+    `crisp ${trim.name} trim boards at the corners and around every opening, ${describeColor(trim)}`,
+  ];
+
+  if (spec.accent && spec.accentPlacement) {
+    const accentField = spec.accentColorRole === "trim" ? trim : body;
+    parts.push(
+      `${spec.accent.productLine} on ${spec.accentPlacement.toLowerCase()} finished in "${accentField.name}" (${describeColor(accentField)}), meeting the wall field in a crisp horizontal break`,
+    );
+  }
+
+  if (landscaping === "clear") {
+    parts.push("clean flat dark mulch at the base of the wall, no shrubs or plantings");
+  }
+
+  parts.push(
+    "photorealistic exterior architectural photography, natural daylight, sharp focus, high detail",
+  );
+
+  return parts.join(", ");
+}

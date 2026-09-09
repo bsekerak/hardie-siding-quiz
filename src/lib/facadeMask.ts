@@ -112,8 +112,13 @@ export async function detectFacadeRegions(
  * below the wall line so foundation beds can be cleared when asked.
  */
 export interface MaskAssets {
-  /** RGBA PNG handed to the API: transparent where editing is allowed. */
+  /** RGBA PNG in OpenAI convention: transparent where editing is allowed. */
   apiMask: Buffer;
+  /**
+   * Greyscale PNG in Flux Fill convention: WHITE is inpainted, black is
+   * preserved. Deliberately un-blurred — the model wants a crisp boundary.
+   */
+  replicateMask: Buffer;
   /**
    * Single-channel alpha used to composite locally: 255 where the model's
    * output should be kept, 0 where the original photo must win. Feathered so
@@ -171,7 +176,10 @@ export async function buildMask(
     .raw()
     .toBuffer();
 
-  // The API wants the inverse convention: transparent means "you may edit".
+  // Flux Fill takes the mask as a plain greyscale image: white = repaint.
+  const replicateMask = await sharp(Buffer.from(svg)).greyscale().png().toBuffer();
+
+  // OpenAI wants the inverse convention: transparent means "you may edit".
   const apiAlpha = await sharp(Buffer.from(svg)).greyscale().negate().raw().toBuffer();
 
   const base = await sharp({
@@ -185,7 +193,7 @@ export async function buildMask(
     .png()
     .toBuffer();
 
-  return { apiMask, compositeAlpha };
+  return { apiMask, replicateMask, compositeAlpha };
 }
 
 /**

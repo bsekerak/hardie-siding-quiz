@@ -90,7 +90,7 @@ export function Visualizer() {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [stage, setStage] = useState<Stage>("setup");
   const [result, setResult] = useState<string | null>(null);
-  const [shape, setShape] = useState<string>("square");
+
   const [error, setError] = useState<string | null>(null);
   const [busyLabel, setBusyLabel] = useState<string>("");
   const [stale, setStale] = useState<boolean>(false);
@@ -185,23 +185,17 @@ export function Visualizer() {
     body.set("plan", JSON.stringify(plan));
     body.set("palette", JSON.stringify(palette));
 
-    if (mode === "initial") {
-      if (!photo) {
-        setError("Add a photo of your house first.");
-        setStage("setup");
-        return;
-      }
-      body.set("image", photo);
-      body.set("landscaping", landscaping);
-    } else {
-      if (!result || !instruction) {
-        setStage("done");
-        return;
-      }
-      body.set("currentImage", result);
-      body.set("instruction", instruction);
-      body.set("shape", shape);
+    if (!photo) {
+      setError("Add a photo of your house first.");
+      setStage("setup");
+      return;
     }
+    // Always send the original photo. Refinements are re-renders with an extra
+    // instruction rather than edits of the previous output, so repeated tweaks
+    // cannot compound drift.
+    body.set("image", photo);
+    body.set("landscaping", landscaping);
+    if (mode === "refine" && instruction) body.set("instruction", instruction);
 
     try {
       const response = await fetch("/api/visualize", { method: "POST", body });
@@ -229,7 +223,7 @@ export function Visualizer() {
         return;
       }
       setResult(data.imageUrl);
-      if (typeof data.shape === "string") setShape(data.shape);
+
       setStage("done");
     } catch (fetchError) {
       const detail = fetchError instanceof Error ? ` (${fetchError.message})` : "";
