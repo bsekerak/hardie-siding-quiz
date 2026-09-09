@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import OpenAI from "openai";
 import sharp from "sharp";
 import { buildInpaintPrompt, type LandscapingMode } from "@/lib/visualizerPrompt";
-import { InpaintNotConfiguredError, inpaintSiding } from "@/lib/inpaint";
+import { InpaintBillingError, InpaintNotConfiguredError, inpaintSiding } from "@/lib/inpaint";
 import { BUILD_ID } from "@/lib/buildId";
 import { buildMask, compositeOntoOriginal, detectFacadeRegions } from "@/lib/facadeMask";
 import type { Palette, SidingPlan } from "@/types/quiz";
@@ -181,6 +181,9 @@ export async function POST(request: NextRequest) {
       buildId: BUILD_ID,
     });
   } catch (error) {
+    if (error instanceof InpaintBillingError) {
+      return NextResponse.json({ error: error.message, code: "no_credit" }, { status: 402 });
+    }
     if (error instanceof InpaintNotConfiguredError) {
       return NextResponse.json({ error: error.message, code: "not_configured" }, { status: 503 });
     }

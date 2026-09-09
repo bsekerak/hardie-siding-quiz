@@ -11,6 +11,15 @@ import Replicate from "replicate";
 const MODEL = (process.env.REPLICATE_INPAINT_MODEL ??
   "black-forest-labs/flux-fill-dev") as `${string}/${string}`;
 
+export class InpaintBillingError extends Error {
+  constructor() {
+    super(
+      "Your Replicate account has no credit, so the render could not run. Add credit at replicate.com/account/billing — Flux Fill costs roughly $0.04 per image.",
+    );
+    this.name = "InpaintBillingError";
+  }
+}
+
 export class InpaintNotConfiguredError extends Error {
   constructor() {
     super("REPLICATE_API_TOKEN is not set on this deployment.");
@@ -59,19 +68,30 @@ export async function inpaintSiding(
 
   const replicate = new Replicate({ auth: token });
 
-  const output = await replicate.run(MODEL, {
-    input: {
-      image: toDataUri(imagePng),
-      mask: toDataUri(maskPng),
-      prompt,
-      output_format: "png",
-      // Fill models want markedly higher guidance than text-to-image.
-      guidance: 32,
-      num_inference_steps: 32,
+  let output: unknown;
+  try {
+    output = await replicate.run(MODEL, {
+      input: {
+        image: toDataUri(imagePng),
+        mask: toDataUri(maskPng),
+        prompt,
+        output_format: "png",
+        // Fill models want markedly higher guidance than text-to-image.
+        guidance: 32,
+        num_inference_steps: 32,
       // Keep the untouched region bit-exact rather than re-encoded.
-      output_quality: 100,
-    },
-  });
+        output_quality: 100,
+      },
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    // Replicate surfaces billing problems as a 402 with a long JSON body; the
+    // homeowner needs the one actionable sentence, not the payload.
+    if (message.includes("402") || message.toLowerCase().includes("insufficient credit")) {
+      throw new InpaintBillingError();
+    }
+    throw error;
+  }
 
   return readOutput(output);
 }
