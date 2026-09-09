@@ -8,6 +8,7 @@ import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/components/ui/cn";
 import { useQuiz } from "@/context/QuizContext";
 import { buildPlan } from "@/lib/engine";
+import { downscaleImage, formatBytes } from "@/lib/downscale";
 import { decodePlan } from "@/lib/share";
 import { QUICK_ADJUSTMENTS, type LandscapingMode } from "@/lib/visualizerPrompt";
 import type { Palette } from "@/types/quiz";
@@ -84,6 +85,7 @@ export function Visualizer() {
   const [tierIndex, setTierIndex] = useState<number>(shared?.paletteIndex ?? 0);
   const [landscaping, setLandscaping] = useState<LandscapingMode>("keep");
   const [photo, setPhoto] = useState<File | null>(null);
+  const [photoNote, setPhotoNote] = useState<string | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [stage, setStage] = useState<Stage>("setup");
   const [result, setResult] = useState<string | null>(null);
@@ -126,10 +128,20 @@ export function Visualizer() {
   const palette = plan.palettes[tierIndex] ?? plan.palettes[0];
   if (!palette) return null;
 
-  const onPickFile = (file: File | null): void => {
+  const onPickFile = async (file: File | null): Promise<void> => {
     setError(null);
-    setPhoto(file);
-    setPhotoPreview(file ? URL.createObjectURL(file) : null);
+    setPhotoNote(null);
+    if (!file) {
+      setPhoto(null);
+      setPhotoPreview(null);
+      return;
+    }
+    setPhotoPreview(URL.createObjectURL(file));
+    const prepared = await downscaleImage(file);
+    setPhoto(prepared);
+    if (prepared.size !== file.size) {
+      setPhotoNote(`Resized for upload — ${formatBytes(file.size)} → ${formatBytes(prepared.size)}`);
+    }
   };
 
   const run = async (mode: "initial" | "refine", instruction?: string): Promise<void> => {
@@ -161,17 +173,34 @@ export function Visualizer() {
 
     try {
       const response = await fetch("/api/visualize", { method: "POST", body });
-      const payload: unknown = await response.json();
-      const data = payload as { imageUrl?: string; error?: string };
+
+      // A platform-level rejection (payload too large, gateway timeout) comes
+      // back as plain text, so parsing it as JSON would throw and get reported
+      // as a connection failure — which it isn't.
+      let data: { imageUrl?: string; error?: string } = {};
+      const contentType = response.headers.get("content-type") ?? "";
+      if (contentType.includes("application/json")) {
+        data = (await response.json()) as { imageUrl?: string; error?: string };
+      } else {
+        const text = await response.text();
+        data = {
+          error:
+            response.status === 413
+              ? "That photo is too large to upload. Try one straight from your camera roll at a smaller size."
+              : `The visualizer returned an unexpected response (${response.status}). ${text.slice(0, 120)}`,
+        };
+      }
+
       if (!response.ok || !data.imageUrl) {
-        setError(data.error ?? "The visualizer failed. Try again.");
+        setError(data.error ?? `The visualizer failed (${response.status}). Try again.`);
         setStage(result ? "done" : "setup");
         return;
       }
       setResult(data.imageUrl);
       setStage("done");
-    } catch {
-      setError("Could not reach the visualizer. Check your connection and try again.");
+    } catch (fetchError) {
+      const detail = fetchError instanceof Error ? ` (${fetchError.message})` : "";
+      setError(`Could not reach the visualizer${detail}. Check your connection and try again.`);
       setStage(result ? "done" : "setup");
     }
   };
@@ -255,7 +284,7 @@ export function Visualizer() {
                 type="file"
                 accept="image/png,image/jpeg,image/webp"
                 className="sr-only"
-                onChange={(event) => onPickFile(event.target.files?.[0] ?? null)}
+                onChange={(event) => void onPickFile(event.target.files?.[0] ?? null)}
               />
               <button
                 type="button"
@@ -270,6 +299,9 @@ export function Visualizer() {
                   Straight-on front elevation works best · JPG or PNG
                 </span>
               </button>
+              {photoNote ? (
+                <p className="mt-2 text-[11px] font-medium text-slateCharcoal-muted">{photoNote}</p>
+              ) : null}
               {photoPreview ? (
                 <div className="mt-3 border border-stone-300">
                   {/* eslint-disable-next-line @next/next/no-img-element */}

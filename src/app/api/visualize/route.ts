@@ -13,7 +13,9 @@ export const runtime = "nodejs";
 export const maxDuration = 300;
 
 const SIZE = 1024;
-const MAX_UPLOAD_BYTES = 12 * 1024 * 1024;
+// Vercel rejects bodies over ~4.5MB at the edge, so this guard sits just under
+// it. The client downscales before upload; this is the backstop.
+const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 
 /** Normalizes any upload to a square 1024px PNG, which is what gpt-image-1 wants. */
 async function toSquarePng(buffer: Buffer): Promise<Awaited<ReturnType<typeof toFile>>> {
@@ -96,7 +98,7 @@ export async function POST(request: NextRequest) {
       }
       if (upload.size > MAX_UPLOAD_BYTES) {
         return NextResponse.json(
-          { error: "That photo is larger than 12MB. Try a smaller one." },
+          { error: "That photo is too large to upload. Try a smaller one." },
           { status: 413 },
         );
       }
