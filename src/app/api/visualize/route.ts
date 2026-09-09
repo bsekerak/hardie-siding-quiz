@@ -65,6 +65,25 @@ export async function GET() {
   );
 }
 
+export async function PUT(request: NextRequest) {
+  // Diagnostic only: probes segmentation models against a real photo so the
+  // mask source can be validated before anything is rebuilt around it.
+  const { probeSegmentation } = await import("@/lib/segment");
+  const formData = await request.formData();
+  const upload = formData.get("image");
+  if (!(upload instanceof File)) {
+    return NextResponse.json({ error: "No photo provided." }, { status: 400 });
+  }
+  const prepared = await prepareImage(Buffer.from(await upload.arrayBuffer()));
+  const attempts = await probeSegmentation(prepared.png);
+  return NextResponse.json({
+    attempts: attempts.map(({ maskBase64, ...rest }) => ({ ...rest, hasMask: Boolean(maskBase64) })),
+    maskUrl: attempts.find((a) => a.maskBase64)
+      ? `data:image/png;base64,${attempts.find((a) => a.maskBase64)?.maskBase64}`
+      : undefined,
+  });
+}
+
 export async function POST(request: NextRequest) {
   const openaiKey = process.env.OPENAI_API_KEY;
   if (!openaiKey) {
