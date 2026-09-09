@@ -213,9 +213,13 @@ export async function POST(request: NextRequest) {
     let finalPng: Buffer = Buffer.from(b64, "base64") as Buffer;
     let composited = false;
 
-    // Enforce preservation locally rather than trusting the model to honour the
-    // mask. Everything outside the siding region reverts to the original photo.
-    if (originalPng && compositeAlpha) {
+    // Compositing is DISABLED. gpt-image-1 does not preserve geometry: its output
+    // house sits at a slightly different scale and position than the input, so
+    // pasting the siding region back over the original photo misregisters and
+    // leaves a hard rectangular seam. Kept behind a flag because it becomes the
+    // correct approach the moment a true inpainting model is used.
+    const ENABLE_COMPOSITE = false;
+    if (ENABLE_COMPOSITE && originalPng && compositeAlpha) {
       try {
         finalPng = (await compositeOntoOriginal(
           originalPng,
