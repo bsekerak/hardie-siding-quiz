@@ -8,7 +8,7 @@ import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/components/ui/cn";
 import { useQuiz } from "@/context/QuizContext";
 import { buildPlan } from "@/lib/engine";
-import { downscaleImage, formatBytes } from "@/lib/downscale";
+import { ImageDecodeError, downscaleImage, formatBytes } from "@/lib/downscale";
 import { decodePlan } from "@/lib/share";
 import { QUICK_ADJUSTMENTS, type LandscapingMode } from "@/lib/visualizerPrompt";
 import type { Palette } from "@/types/quiz";
@@ -137,10 +137,20 @@ export function Visualizer() {
       return;
     }
     setPhotoPreview(URL.createObjectURL(file));
-    const prepared = await downscaleImage(file);
-    setPhoto(prepared);
-    if (prepared.size !== file.size) {
-      setPhotoNote(`Resized for upload — ${formatBytes(file.size)} → ${formatBytes(prepared.size)}`);
+    try {
+      const prepared = await downscaleImage(file);
+      setPhoto(prepared);
+      setPhotoNote(
+        `Ready to upload — ${formatBytes(file.size)} → ${formatBytes(prepared.size)} JPEG`,
+      );
+    } catch (decodeError) {
+      setPhoto(null);
+      setPhotoPreview(null);
+      setError(
+        decodeError instanceof ImageDecodeError
+          ? decodeError.message
+          : "That image could not be read. Try a JPEG or PNG.",
+      );
     }
   };
 
@@ -282,7 +292,7 @@ export function Visualizer() {
               <input
                 ref={fileInput}
                 type="file"
-                accept="image/png,image/jpeg,image/webp"
+                accept="image/*"
                 className="sr-only"
                 onChange={(event) => void onPickFile(event.target.files?.[0] ?? null)}
               />
@@ -296,7 +306,7 @@ export function Visualizer() {
                   {photo ? "Choose a different photo" : "Upload a photo"}
                 </span>
                 <span className="text-[11px] text-slateCharcoal-muted">
-                  Straight-on front elevation works best · JPG or PNG
+                  Straight-on front elevation works best · JPG, PNG or HEIC
                 </span>
               </button>
               {photoNote ? (
