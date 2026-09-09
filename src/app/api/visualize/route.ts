@@ -1,10 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
-import OpenAI from "openai";
+import OpenAI, { toFile } from "openai";
 import sharp from "sharp";
-import { buildInpaintPrompt, type LandscapingMode } from "@/lib/visualizerPrompt";
+import { type LandscapingMode } from "@/lib/visualizerPrompt";
 
 import { BUILD_ID } from "@/lib/buildId";
-import { buildMask, detectFacadeGrid, recolorSiding } from "@/lib/facadeMask";
+import { buildMask, detectFacadeGrid } from "@/lib/facadeMask";
+import { buildSidingPrompt } from "@/lib/visualizerPrompt";
 import type { Palette, SidingPlan } from "@/types/quiz";
 
 export const runtime = "nodejs";
@@ -138,16 +139,38 @@ export async function POST(request: NextRequest) {
     const growDown = landscaping === "clear" ? 9 : 1.5;
     const mask = await buildMask(grid, prepared.width, prepared.height, growDown);
 
-    let prompt = buildInpaintPrompt(plan, palette, landscaping);
-    if (instruction) prompt = `${prompt}. ${instruction}`;
+    // Generation runs on gpt-image-1. It does not preserve geometry — see the
+    // note in facadeMask — but it is the only path here that produces a
+    // presentable render. The mask still steers it toward the walls.
+    let prompt = buildSidingPrompt(plan, palette, landscaping);
+    if (instruction) prompt = `${prompt} Also apply this change: ${instruction}`;
 
-    const finalPng = (await recolorSiding(
-      prepared.png,
-      mask.compositeAlpha,
-      palette.body.color.hex,
-      prepared.width,
-      prepared.height,
-    )) as Buffer;
+    const imageFile = await toFile(
+      new Blob([new Uint8Array(prepared.png)], { type: "image/png" }),
+      "house.png",
+      { type: "image/png" },
+    );
+    const maskFile = await toFile(
+      new Blob([new Uint8Array(mask.apiMask)], { type: "image/png" }),
+      "mask.png",
+      { type: "image/png" },
+    );
+
+    const response = await openai.images.edit({
+      model: "gpt-image-1",
+      image: imageFile,
+      mask: maskFile,
+      prompt,
+      n: 1,
+      size: OUTPUT_SIZES[prepared.shape].api,
+      quality: "medium",
+    });
+
+    const b64 = response.data?.[0]?.b64_json;
+    if (!b64) {
+      return NextResponse.json({ error: "No image came back. Try again." }, { status: 502 });
+    }
+    const finalPng = Buffer.from(b64, "base64");
 
     // ?debug=1 returns the intermediate artefacts so a bad mask or a no-op
     // generation can be told apart without guessing.
@@ -166,7 +189,6 @@ export async function POST(request: NextRequest) {
       imageUrl: `data:image/png;base64,${finalPng.toString("base64")}`,
       shape: prepared.shape,
       masked: true,
-      recolored: true,
       openingCount: grid.openings.length,
       buildId: BUILD_ID,
     });
