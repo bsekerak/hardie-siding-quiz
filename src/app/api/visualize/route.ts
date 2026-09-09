@@ -7,7 +7,7 @@ import {
   type LandscapingMode,
 } from "@/lib/visualizerPrompt";
 import { BUILD_ID } from "@/lib/buildId";
-import { buildMask, detectFacadePolygon } from "@/lib/facadeMask";
+import { buildMask, detectFacadeRegions } from "@/lib/facadeMask";
 import type { Palette, SidingPlan } from "@/types/quiz";
 
 export const runtime = "nodejs";
@@ -129,6 +129,7 @@ export async function POST(request: NextRequest) {
     let prompt: string;
     let shape: OutputShape = "square";
     let masked = false;
+    let openingCount = 0;
 
     if (mode === "refine") {
       const current = formData.get("currentImage");
@@ -165,12 +166,13 @@ export async function POST(request: NextRequest) {
 
       // Confine the edit to the house itself. Without this the model regenerates
       // the whole frame and quietly redraws the walkway, beds and massing.
-      const polygon = await detectFacadePolygon(openai, prepared.png.toString("base64"));
-      if (polygon) {
+      const regions = await detectFacadeRegions(openai, prepared.png.toString("base64"));
+      if (regions) {
         // Clearing the beds needs a little room below the wall line; keeping
         // them means touching nothing outside the structure at all.
         const growDown = landscaping === "clear" ? 9 : 1.5;
-        const mask = await buildMask(polygon, prepared.width, prepared.height, growDown);
+        const mask = await buildMask(regions, prepared.width, prepared.height, growDown);
+        openingCount = regions.openings.length;
         maskFile = await toFile(new Blob([new Uint8Array(mask)], { type: "image/png" }), "mask.png", {
           type: "image/png",
         });
@@ -197,7 +199,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No image came back. Try again." }, { status: 502 });
     }
 
-    return NextResponse.json({ imageUrl: `data:image/png;base64,${b64}`, shape, masked, buildId: BUILD_ID });
+    return NextResponse.json({ imageUrl: `data:image/png;base64,${b64}`, shape, masked, openingCount, buildId: BUILD_ID });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "The visualizer failed. Try again.";
