@@ -166,7 +166,6 @@ export async function POST(request: NextRequest) {
         ? {
             maskUrl: `data:image/png;base64,${(await sharp(wallAlpha, { raw: { width: prepared.width, height: prepared.height, channels: 1 } }).png().toBuffer()).toString("base64")}`,
             preparedUrl: `data:image/png;base64,${prepared.png.toString("base64")}`,
-            prompt,
           }
         : {}),
       imageUrl: `data:image/png;base64,${finalPng.toString("base64")}`,
