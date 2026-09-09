@@ -43,10 +43,17 @@ export async function detectFacadeRegions(
               type: "text",
               text:
                 "Analyse this house photo and return TWO things as JSON.\n\n" +
-                "1. \"wall\": the outline of the SIDED WALL SURFACES only — the flat cladding " +
-                "including gable triangles — following the underside of the roof edge and soffit. " +
-                "EXCLUDE the roof planes and shingles themselves, the lawn, planting beds, shrubs, " +
-                "trees, walkway, driveway and sky. 8 to 20 points, ordered clockwise.\n\n" +
+                "1. \"wall\": a TIGHT silhouette of the SIDED WALL SURFACES — the flat cladding " +
+                "including gable triangles. Trace the actual outline step by step: up the left " +
+                "corner of the house, along each roof edge and soffit (following every gable peak " +
+                "and every change in roof height separately), down the right corner, and back " +
+                "along the base of the wall where it meets the ground or foundation.\n" +
+                "This must NOT be a bounding box. Sky must be OUTSIDE the shape. Roof shingles " +
+                "must be OUTSIDE the shape. Lawn, beds, shrubs, trees, walkway and driveway must " +
+                "be OUTSIDE the shape. If the roofline steps down over a garage wing, the outline " +
+                "must step down with it.\n" +
+                "Use 20 to 40 points ordered clockwise — more points along the roofline than " +
+                "anywhere else, because that edge is where accuracy matters most.\n\n" +
                 "2. \"openings\": a tight bounding rectangle around EVERY window (including its " +
                 "shutters and grilles), every door, every garage door, every gable louver or vent, " +
                 "and every exterior light fixture. Be generous rather than tight — it is better to " +
@@ -211,10 +218,15 @@ export async function compositeOntoOriginal(
   width: number,
   height: number,
 ): Promise<Buffer> {
-  const generated = await sharp(generatedPng).resize(width, height, { fit: "fill" }).toBuffer();
+  // removeAlpha() first: joinChannel APPENDS, so an existing alpha channel would
+  // leave a 5-channel image and sharp would key transparency off the wrong one —
+  // which silently rendered the generated layer invisible.
+  const generated = await sharp(generatedPng)
+    .resize(width, height, { fit: "fill" })
+    .removeAlpha()
+    .toBuffer();
 
   const generatedWithAlpha = await sharp(generated)
-    .ensureAlpha()
     .joinChannel(compositeAlpha, { raw: { width, height, channels: 1 } })
     .png()
     .toBuffer();
