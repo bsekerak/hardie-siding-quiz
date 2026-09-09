@@ -236,3 +236,49 @@ export async function compositeOntoOriginal(
     .png()
     .toBuffer();
 }
+
+
+/**
+ * Flux Fill is built to blend a filled region into its surroundings, which is
+ * exactly wrong when the point is to CHANGE the colour: given blue siding all
+ * around the mask, it happily paints more blue however firmly the prompt asks
+ * for sage.
+ *
+ * So give it something to blend toward. Flooding the masked region with the
+ * target colour before generation turns that blending instinct from a problem
+ * into the mechanism — the model keeps the hue and supplies the board lines,
+ * shadows and texture that a flat fill cannot.
+ */
+export async function tintMaskedRegion(
+  imagePng: Buffer,
+  compositeAlpha: Buffer,
+  hex: string,
+  width: number,
+  height: number,
+  strength = 0.88,
+): Promise<Buffer> {
+  const clean = hex.replace("#", "");
+  const r = Number.parseInt(clean.slice(0, 2), 16);
+  const g = Number.parseInt(clean.slice(2, 4), 16);
+  const b = Number.parseInt(clean.slice(4, 6), 16);
+
+  // Scale the mask alpha down so a little of the original luminance shows
+  // through, which keeps shadows and modelling readable to the model.
+  const scaled = Buffer.from(compositeAlpha.map((value) => Math.round(value * strength)));
+
+  const solid = await sharp({
+    create: { width, height, channels: 3, background: { r, g, b } },
+  })
+    .raw()
+    .toBuffer();
+
+  const tintLayer = await sharp(solid, { raw: { width, height, channels: 3 } })
+    .joinChannel(scaled, { raw: { width, height, channels: 1 } })
+    .png()
+    .toBuffer();
+
+  return sharp(imagePng)
+    .composite([{ input: tintLayer, blend: "over" }])
+    .png()
+    .toBuffer();
+}

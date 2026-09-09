@@ -4,7 +4,12 @@ import sharp from "sharp";
 import { buildInpaintPrompt, type LandscapingMode } from "@/lib/visualizerPrompt";
 import { InpaintBillingError, InpaintNotConfiguredError, inpaintSiding } from "@/lib/inpaint";
 import { BUILD_ID } from "@/lib/buildId";
-import { buildMask, compositeOntoOriginal, detectFacadeGrid } from "@/lib/facadeMask";
+import {
+  buildMask,
+  compositeOntoOriginal,
+  detectFacadeGrid,
+  tintMaskedRegion,
+} from "@/lib/facadeMask";
 import type { Palette, SidingPlan } from "@/types/quiz";
 
 export const runtime = "nodejs";
@@ -152,7 +157,17 @@ export async function POST(request: NextRequest) {
     let prompt = buildInpaintPrompt(plan, palette, landscaping);
     if (instruction) prompt = `${prompt}. ${instruction}`;
 
-    const generated = await inpaintSiding(prepared.png, mask.replicateMask, prompt);
+    // Pre-tint so the model's blend-with-context behaviour carries the colour
+    // instead of fighting it.
+    const tinted = await tintMaskedRegion(
+      prepared.png,
+      mask.compositeAlpha,
+      palette.body.color.hex,
+      prepared.width,
+      prepared.height,
+    );
+
+    const generated = await inpaintSiding(tinted, mask.replicateMask, prompt);
 
     // Flux Fill preserves geometry outside the mask, so compositing is now both
     // valid and belt-and-braces: every pixel outside the siding region is taken
@@ -182,6 +197,7 @@ export async function POST(request: NextRequest) {
             maskUrl: `data:image/png;base64,${mask.replicateMask.toString("base64")}`,
             rawUrl: `data:image/png;base64,${generated.toString("base64")}`,
             preparedUrl: `data:image/png;base64,${prepared.png.toString("base64")}`,
+            tintedUrl: `data:image/png;base64,${tinted.toString("base64")}`,
             wallCells: grid.cells.filter(Boolean).length,
             gridTotal: grid.cells.length,
             prompt,
