@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Button, ButtonLink, CtaArrow } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/components/ui/cn";
 import { useQuiz } from "@/context/QuizContext";
+import { BUILD_ID } from "@/lib/buildId";
 import { buildPlan } from "@/lib/engine";
 import { ImageDecodeError, downscaleImage, formatBytes } from "@/lib/downscale";
 import { decodePlan } from "@/lib/share";
@@ -92,7 +93,26 @@ export function Visualizer() {
   const [shape, setShape] = useState<string>("square");
   const [error, setError] = useState<string | null>(null);
   const [busyLabel, setBusyLabel] = useState<string>("");
+  const [stale, setStale] = useState<boolean>(false);
   const fileInput = useRef<HTMLInputElement>(null);
+
+  // A browser holding a cached bundle silently runs old code — including old
+  // prompts and old controls — which looks exactly like the feature being
+  // broken. Ask the server what build it is on and say so plainly.
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/visualize", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data: { buildId?: string } | null) => {
+        if (!cancelled && data?.buildId && data.buildId !== BUILD_ID) setStale(true);
+      })
+      .catch(() => {
+        // Version check is best-effort; never block the page on it.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   if (!hydrated) {
     return (
@@ -223,6 +243,16 @@ export function Visualizer() {
   return (
     <div className="container-page py-10 sm:py-14">
       <div className="mx-auto max-w-5xl">
+        {stale ? (
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-l-[3px] border-gold bg-stone-200 p-5">
+            <p className="text-[13px] leading-relaxed text-slateCharcoal">
+              <span className="font-bold">This page is running an older version.</span> Reload to
+              pick up the latest visualizer — otherwise you&apos;ll be testing outdated behaviour.
+            </p>
+            <Button onClick={() => window.location.reload()}>Reload now</Button>
+          </div>
+        ) : null}
+
         <header className="border-b-2 border-hardie-500 pb-5">
           <p className="eyebrow">Step 02 — Visualize</p>
           <h1 className="mt-2 text-32p font-black tracking-tight text-slateCharcoal sm:text-40p">

@@ -6,6 +6,7 @@ import {
   buildSidingPrompt,
   type LandscapingMode,
 } from "@/lib/visualizerPrompt";
+import { BUILD_ID } from "@/lib/buildId";
 import type { Palette, SidingPlan } from "@/types/quiz";
 
 export const runtime = "nodejs";
@@ -66,6 +67,14 @@ async function fileFromDataUrl(dataUrl: string): Promise<Awaited<ReturnType<type
   return toFile(new Blob([new Uint8Array(binary)], { type: "image/png" }), "current.png", {
     type: "image/png",
   });
+}
+
+/** Lets the client detect that it is running a stale bundle. */
+export async function GET() {
+  return NextResponse.json(
+    { buildId: BUILD_ID },
+    { headers: { "cache-control": "no-store" } },
+  );
 }
 
 export async function POST(request: NextRequest) {
@@ -154,6 +163,9 @@ export async function POST(request: NextRequest) {
       prompt,
       n: 1,
       size: OUTPUT_SIZES[shape].api,
+      // Medium keeps renders near 25-35s and well inside the function timeout,
+      // at a fraction of the cost of "high". Plenty for design exploration.
+      quality: "medium",
     });
 
     const b64 = response.data?.[0]?.b64_json;
@@ -161,7 +173,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No image came back. Try again." }, { status: 502 });
     }
 
-    return NextResponse.json({ imageUrl: `data:image/png;base64,${b64}`, shape });
+    return NextResponse.json({ imageUrl: `data:image/png;base64,${b64}`, shape, buildId: BUILD_ID });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "The visualizer failed. Try again.";
