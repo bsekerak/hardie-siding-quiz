@@ -111,12 +111,23 @@ export async function detectFacadeRegions(
  * else stays opaque (preserved). `growDownPercent` extends the editable region
  * below the wall line so foundation beds can be cleared when asked.
  */
+export interface MaskAssets {
+  /** RGBA PNG handed to the API: transparent where editing is allowed. */
+  apiMask: Buffer;
+  /**
+   * Single-channel alpha used to composite locally: 255 where the model's
+   * output should be kept, 0 where the original photo must win. Feathered so
+   * the seam is invisible.
+   */
+  compositeAlpha: Buffer;
+}
+
 export async function buildMask(
   regions: FacadeRegions,
   width: number,
   height: number,
   growDownPercent: number,
-): Promise<Buffer> {
+): Promise<MaskAssets> {
   const { wall, openings } = regions;
   const grow = (growDownPercent / 100) * height;
   const centroidY = wall.reduce((sum, p) => sum + p.y, 0) / wall.length;
@@ -152,12 +163,16 @@ export async function buildMask(
     ${holes}
   </svg>`;
 
-  // White polygon -> negated -> alpha 0 inside the polygon, 255 outside.
-  const alpha = await sharp(Buffer.from(svg))
+  // 255 inside the editable region, 0 outside. Feathered so the composite seam
+  // does not show as a hard edge along the wall line.
+  const compositeAlpha = await sharp(Buffer.from(svg))
     .greyscale()
-    .negate()
+    .blur(1.5)
     .raw()
     .toBuffer();
+
+  // The API wants the inverse convention: transparent means "you may edit".
+  const apiAlpha = await sharp(Buffer.from(svg)).greyscale().negate().raw().toBuffer();
 
   const base = await sharp({
     create: { width, height, channels: 3, background: { r: 0, g: 0, b: 0 } },
@@ -165,8 +180,39 @@ export async function buildMask(
     .raw()
     .toBuffer();
 
-  return sharp(base, { raw: { width, height, channels: 3 } })
-    .joinChannel(alpha, { raw: { width, height, channels: 1 } })
+  const apiMask = await sharp(base, { raw: { width, height, channels: 3 } })
+    .joinChannel(apiAlpha, { raw: { width, height, channels: 1 } })
+    .png()
+    .toBuffer();
+
+  return { apiMask, compositeAlpha };
+}
+
+/**
+ * gpt-image-1 regenerates the whole frame even when given a mask — unlike
+ * DALL-E 2 inpainting, the mask is guidance rather than a guarantee. So the
+ * preservation is enforced here instead: the model's output is kept only inside
+ * the siding region, and every other pixel comes straight from the homeowner's
+ * photo. Windows, roof, trees and hardscape are then byte-identical by
+ * construction rather than by request.
+ */
+export async function compositeOntoOriginal(
+  originalPng: Buffer,
+  generatedPng: Buffer,
+  compositeAlpha: Buffer,
+  width: number,
+  height: number,
+): Promise<Buffer> {
+  const generated = await sharp(generatedPng).resize(width, height, { fit: "fill" }).toBuffer();
+
+  const generatedWithAlpha = await sharp(generated)
+    .ensureAlpha()
+    .joinChannel(compositeAlpha, { raw: { width, height, channels: 1 } })
+    .png()
+    .toBuffer();
+
+  return sharp(originalPng)
+    .composite([{ input: generatedWithAlpha, blend: "over" }])
     .png()
     .toBuffer();
 }

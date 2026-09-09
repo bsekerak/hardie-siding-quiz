@@ -7,7 +7,7 @@ import {
   type LandscapingMode,
 } from "@/lib/visualizerPrompt";
 import { BUILD_ID } from "@/lib/buildId";
-import { buildMask, detectFacadeRegions } from "@/lib/facadeMask";
+import { buildMask, compositeOntoOriginal, detectFacadeRegions } from "@/lib/facadeMask";
 import type { Palette, SidingPlan } from "@/types/quiz";
 
 export const runtime = "nodejs";
@@ -130,6 +130,11 @@ export async function POST(request: NextRequest) {
     let shape: OutputShape = "square";
     let masked = false;
     let openingCount = 0;
+    // Retained so the generated frame can be composited back over the photo.
+    let originalPng: Buffer | null = null;
+    let compositeAlpha: Buffer | null = null;
+    let frameWidth = 0;
+    let frameHeight = 0;
 
     if (mode === "refine") {
       const current = formData.get("currentImage");
@@ -159,6 +164,9 @@ export async function POST(request: NextRequest) {
       const prepared = await prepareImage(buffer);
       imageFile = prepared.file;
       shape = prepared.shape;
+      originalPng = prepared.png;
+      frameWidth = prepared.width;
+      frameHeight = prepared.height;
       const landscaping = (String(formData.get("landscaping") ?? "keep") === "clear"
         ? "clear"
         : "keep") as LandscapingMode;
@@ -173,9 +181,12 @@ export async function POST(request: NextRequest) {
         const growDown = landscaping === "clear" ? 9 : 1.5;
         const mask = await buildMask(regions, prepared.width, prepared.height, growDown);
         openingCount = regions.openings.length;
-        maskFile = await toFile(new Blob([new Uint8Array(mask)], { type: "image/png" }), "mask.png", {
-          type: "image/png",
-        });
+        compositeAlpha = mask.compositeAlpha;
+        maskFile = await toFile(
+          new Blob([new Uint8Array(mask.apiMask)], { type: "image/png" }),
+          "mask.png",
+          { type: "image/png" },
+        );
         masked = true;
       }
     }
@@ -199,7 +210,34 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No image came back. Try again." }, { status: 502 });
     }
 
-    return NextResponse.json({ imageUrl: `data:image/png;base64,${b64}`, shape, masked, openingCount, buildId: BUILD_ID });
+    let finalPng: Buffer = Buffer.from(b64, "base64") as Buffer;
+    let composited = false;
+
+    // Enforce preservation locally rather than trusting the model to honour the
+    // mask. Everything outside the siding region reverts to the original photo.
+    if (originalPng && compositeAlpha) {
+      try {
+        finalPng = (await compositeOntoOriginal(
+          originalPng,
+          finalPng,
+          compositeAlpha,
+          frameWidth,
+          frameHeight,
+        )) as Buffer;
+        composited = true;
+      } catch (compositeError) {
+        console.error("[/api/visualize] composite failed", compositeError);
+      }
+    }
+
+    return NextResponse.json({
+      imageUrl: `data:image/png;base64,${finalPng.toString("base64")}`,
+      shape,
+      masked,
+      composited,
+      openingCount,
+      buildId: BUILD_ID,
+    });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "The visualizer failed. Try again.";
