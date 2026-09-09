@@ -239,46 +239,45 @@ export async function compositeOntoOriginal(
 
 
 /**
- * Flux Fill is built to blend a filled region into its surroundings, which is
- * exactly wrong when the point is to CHANGE the colour: given blue siding all
- * around the mask, it happily paints more blue however firmly the prompt asks
- * for sage.
+ * Recolours the wall deterministically instead of regenerating it.
  *
- * So give it something to blend toward. Flooding the masked region with the
- * target colour before generation turns that blending instinct from a problem
- * into the mechanism — the model keeps the hue and supplies the board lines,
- * shadows and texture that a flat fill cannot.
+ * Inpainting discards the masked pixels and re-imagines them from surrounding
+ * context, which is why no amount of prompting or pre-tinting produced the
+ * specified ColorPlus colour — and why windows and rooflines kept drifting.
+ *
+ * Converting the wall to luminance and tinting it keeps the real shadows, board
+ * lines, siding texture and every architectural detail of the homeowner's own
+ * photo, and lands the exact hex from the palette. It is deterministic, free,
+ * near-instant, and cannot hallucinate a window that is not there.
  */
-export async function tintMaskedRegion(
+export async function recolorSiding(
   imagePng: Buffer,
   compositeAlpha: Buffer,
   hex: string,
   width: number,
   height: number,
-  strength = 0.88,
 ): Promise<Buffer> {
   const clean = hex.replace("#", "");
   const r = Number.parseInt(clean.slice(0, 2), 16);
   const g = Number.parseInt(clean.slice(2, 4), 16);
   const b = Number.parseInt(clean.slice(4, 6), 16);
 
-  // Scale the mask alpha down so a little of the original luminance shows
-  // through, which keeps shadows and modelling readable to the model.
-  const scaled = Buffer.from(compositeAlpha.map((value) => Math.round(value * strength)));
-
-  const solid = await sharp({
-    create: { width, height, channels: 3, background: { r, g, b } },
-  })
-    .raw()
+  // Greyscale carries the modelling; tint supplies the chroma. Linear
+  // processing keeps the result from muddying in the midtones.
+  const tintedWall = await sharp(imagePng)
+    .greyscale()
+    .linear(1.06, -6)
+    .tint({ r, g, b })
+    .removeAlpha()
     .toBuffer();
 
-  const tintLayer = await sharp(solid, { raw: { width, height, channels: 3 } })
-    .joinChannel(scaled, { raw: { width, height, channels: 1 } })
+  const wallWithAlpha = await sharp(tintedWall)
+    .joinChannel(compositeAlpha, { raw: { width, height, channels: 1 } })
     .png()
     .toBuffer();
 
   return sharp(imagePng)
-    .composite([{ input: tintLayer, blend: "over" }])
+    .composite([{ input: wallWithAlpha, blend: "over" }])
     .png()
     .toBuffer();
 }
