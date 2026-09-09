@@ -38,8 +38,8 @@ export type LandscapingMode = "keep" | "clear";
 
 function landscapingClause(mode: LandscapingMode): string {
   return mode === "keep"
-    ? "LANDSCAPING: Preserve all existing landscaping exactly as it appears — every shrub, tree, planting bed, mulch, lawn, walkway, driveway and hardscape element must stay in place, unchanged in size, shape and position. "
-    : "LANDSCAPING: Remove the shrubs and foundation plantings directly against the house so the siding is fully visible from the roofline down to grade. Replace them with clean, level mulch beds and tidy lawn. Keep trees, walkways, driveway and all hardscape exactly as they are. ";
+    ? "LANDSCAPING: Preserve all existing landscaping exactly as it appears — every shrub, tree, planting bed, mulch, lawn, walkway, driveway and hardscape element must stay in place, unchanged in size, shape and position. Do NOT invent or add any landscaping, plants, shrubs, beds, walkways or hardscape that is not already visible in the photo. If an area is bare, leave it bare. "
+    : "LANDSCAPING: Remove the shrubs and foundation plantings directly against the house so the siding is fully visible from the roofline down to grade. Replace them with clean, level mulch beds and tidy lawn. Keep trees, walkways, driveway and all hardscape exactly as they are, and do not add any new plantings or features. ";
 }
 
 /**
@@ -84,7 +84,8 @@ export function buildSidingPrompt(
   prompt += landscapingClause(landscaping);
 
   prompt +=
-    `CRITICAL — DO NOT CHANGE: the roof and its color, the roofline and every gable shape, the window ` +
+    `CRITICAL — DO NOT CHANGE: the roof (its exact colour, material and shingle texture must be identical ` +
+    `to the input photo), the roofline and every gable shape, the window ` +
     `positions, sizes, shapes and glass, the door positions, the porch and columns, the chimney, the ` +
     `gutters and downspouts, the foundation, the camera angle, the perspective, the time of day and the ` +
     `lighting. The house must remain unmistakably THE SAME HOUSE — only the siding, trim and front door ` +
