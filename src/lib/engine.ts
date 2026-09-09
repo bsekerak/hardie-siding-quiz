@@ -313,6 +313,7 @@ export function buildProductSpec(answers: QuizAnswers, climate: ClimateProfile):
     primary,
     accent,
     accentPlacement: accent ? mapping.accentPlacement : null,
+    accentColorRole: mapping.accentColorRole,
     zone: climate.zone,
     finish,
     finishRationale,

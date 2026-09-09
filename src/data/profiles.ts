@@ -93,6 +93,12 @@ interface StyleMapping {
   modernPrimary: ProfileId;
   accent: ProfileId | null;
   accentPlacement: string | null;
+  /**
+   * Whether the accent field carries the body colour (so the change reads as
+   * pure texture) or the trim colour (a true two-tone). Farmhouse wants the
+   * former; gable treatments on traditional elevations want the latter.
+   */
+  accentColorRole: "body" | "trim";
   note: string;
 }
 
@@ -100,15 +106,17 @@ export const STYLE_MATRIX: Readonly<Record<ArchStyle, StyleMapping>> = {
   colonial: {
     primary: "hardieplank-select-cedarmill",
     modernPrimary: "hardieplank-smooth",
-    accent: null,
-    accentPlacement: null,
-    note: "Colonial and Cape Cod elevations are symmetrical by design — one uninterrupted lap field with crisp corner boards is the correct move.",
+    accent: "hardiepanel-batten",
+    accentPlacement: "The gable faces above the main roofline",
+    accentColorRole: "trim",
+    note: "A colonial reads best as one clean lap field, but board-and-batten gables in the trim colour is the one addition that consistently lifts it — it breaks up a broad two-storey face without touching the symmetry.",
   },
   craftsman: {
     primary: "hardieplank-select-cedarmill",
     modernPrimary: "hardieplank-select-cedarmill",
     accent: "hardieshingle-staggered",
     accentPlacement: "Gables and the porch skirt",
+    accentColorRole: "trim",
     note: "Craftsman detailing wants a texture change above the belt line — shingle in the gable over lap on the body is the canonical treatment.",
   },
   ranch: {
@@ -116,6 +124,7 @@ export const STYLE_MATRIX: Readonly<Record<ArchStyle, StyleMapping>> = {
     modernPrimary: "hardieplank-smooth",
     accent: "hardiepanel-batten",
     accentPlacement: "Front entry bay or the garage-facing wall",
+    accentColorRole: "body",
     note: "A long low ranch reads better when one vertical element interrupts the horizontal run.",
   },
   "modern-farmhouse": {
@@ -123,6 +132,7 @@ export const STYLE_MATRIX: Readonly<Record<ArchStyle, StyleMapping>> = {
     modernPrimary: "hardiepanel-batten",
     accent: "hardieplank-smooth",
     accentPlacement: "Lower body or a wing, under a board-and-batten upper",
+    accentColorRole: "body",
     note: "Board-and-batten over smooth lap, both in the same body color, is the detail that separates a real modern farmhouse from a costume.",
   },
   contemporary: {
@@ -130,6 +140,7 @@ export const STYLE_MATRIX: Readonly<Record<ArchStyle, StyleMapping>> = {
     modernPrimary: "hardie-architectural-panel",
     accent: "hardieplank-smooth",
     accentPlacement: "Entry volume or a recessed elevation",
+    accentColorRole: "body",
     note: "Panelized fields want a rainscreen and a very disciplined layout. Confirm your installer has done Architectural Collection before, not just lap.",
   },
   victorian: {
@@ -137,6 +148,7 @@ export const STYLE_MATRIX: Readonly<Record<ArchStyle, StyleMapping>> = {
     modernPrimary: "hardieplank-select-cedarmill",
     accent: "hardieshingle-staggered",
     accentPlacement: "Upper story, turret and gable faces",
+    accentColorRole: "trim",
     note: "Victorian elevations expect at least two textures stacked vertically, with heavier trim than a modern build.",
   },
   "split-level": {
@@ -144,6 +156,7 @@ export const STYLE_MATRIX: Readonly<Record<ArchStyle, StyleMapping>> = {
     modernPrimary: "hardieplank-smooth",
     accent: "hardiepanel-vertical",
     accentPlacement: "The upper-level mass, to visually separate the two volumes",
+    accentColorRole: "body",
     note: "Split-levels improve dramatically when the two masses get different treatments instead of one continuous wrap.",
   },
   coastal: {
@@ -151,6 +164,7 @@ export const STYLE_MATRIX: Readonly<Record<ArchStyle, StyleMapping>> = {
     modernPrimary: "hardieplank-smooth",
     accent: "hardieplank-select-cedarmill",
     accentPlacement: "Lower body under a shingled upper",
+    accentColorRole: "trim",
     note: "Straight-edge shingle gives cottage character without the cupping, splitting and moss that real cedar shake develops in salt air.",
   },
 };

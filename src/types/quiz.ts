@@ -230,6 +230,7 @@ export interface ProductSpec {
   primary: SidingProfile;
   accent: SidingProfile | null;
   accentPlacement: string | null;
+  accentColorRole: "body" | "trim";
   zone: HardieZone;
   finish: "ColorPlus" | "Primed for Field Paint";
   finishRationale: string;

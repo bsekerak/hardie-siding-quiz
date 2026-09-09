@@ -39,7 +39,7 @@ export type LandscapingMode = "keep" | "clear";
 
 function landscapingClause(mode: LandscapingMode): string {
   return mode === "keep"
-    ? "LANDSCAPING: Preserve all existing landscaping exactly as it appears — every shrub, tree, planting bed, mulch, lawn, walkway, driveway and hardscape element must stay in place, unchanged in size, shape and position. Do NOT invent or add any landscaping, plants, shrubs, beds, walkways or hardscape that is not already visible in the photo. If an area is bare, leave it bare. "
+    ? "LANDSCAPING — CRITICAL, THIS IS THE MOST COMMONLY GOT WRONG: Every living plant in the original photo MUST still be there in the output, in the same position and at the same size. Reproduce each shrub, bush, ornamental tree, flower, planter, window box and container exactly where it stands, along with the mulch beds, edging stones, decorative boulders, lawn, walkway and driveway. Do not tidy, thin, prune, simplify or clear the planting beds. Do not replace plants with bare mulch. A bed that is full of greenery in the input must be equally full of the same greenery in the output. Only add landscaping that is not already visible if the area is genuinely bare, in which case leave it bare. "
     : "LANDSCAPING: Remove EVERY shrub, bush, flower, planter, window box and foundation planting from against the house, so the wall is completely unobstructed and the siding is visible in one clean run from the roofline all the way down to grade. Replace all of it with flat, freshly-raked dark mulch. Also remove decorative boulders and edging stones along the bed. Keep the lawn, walkway, driveway, steps and mature background trees exactly as they are, and do not add any new plantings or features. ";
 }
 
@@ -70,9 +70,17 @@ export function buildSidingPrompt(
     `The courses must be straight, evenly spaced and consistent across the whole facade. `;
 
   if (spec.accent && spec.accentPlacement) {
+    const accentField = spec.accentColorRole === "trim" ? trim : body;
     prompt +=
-      `ACCENT FIELD: Use ${spec.accent.productLine} on ${spec.accentPlacement.toLowerCase()}, ` +
-      `in the same "${body.name}" body color so the change reads as texture rather than a second color. `;
+      `ACCENT FIELD — THIS IS REQUIRED AND MUST BE CLEARLY VISIBLE: ` +
+      `Clad ${spec.accentPlacement.toLowerCase()} in ${spec.accent.productLine} ` +
+      `(${spec.accent.texture} texture), finished in "${accentField.name}" — ` +
+      `${describeColor(accentField)}, hex ${accentField.hex}. ` +
+      (spec.accentColorRole === "trim"
+        ? `This is a deliberate two-tone treatment: the gable material and colour must contrast ` +
+          `clearly against the "${body.name}" wall field below, with a crisp horizontal break at the ` +
+          `roofline where the two meet. Do not render the gables in the body colour. `
+        : `Keep it in the body colour so the change reads as a texture shift rather than a second colour. `);
   }
 
   prompt +=
