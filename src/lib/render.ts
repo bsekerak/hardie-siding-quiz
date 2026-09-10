@@ -1,23 +1,26 @@
-import Replicate from "replicate";
+import OpenAI, { toFile } from "openai";
 import type { Palette, SidingPlan } from "@/types/quiz";
 
 /**
  * End-to-end image-to-image, no masks.
  *
- * Every masking approach tried before this — polygons, grid occupancy,
- * segmentation, local compositing — produced visible artefacts, because any
- * error in the mask lands directly on screen as a green roof or a missing
- * gable. A low prompt_strength img2img pass preserves geometry through the
- * diffusion process itself rather than by cutting the image up.
+ * Every masking approach produced visible artefacts, because any error in the
+ * mask lands on screen as a green roof or a missing gable.
+ *
+ * flux-dev img2img held geometry beautifully but would not follow the colour
+ * instruction at any strength: at 0.4 the siding stayed its original colour, and
+ * by 0.7 the walls had degenerated into block patterns while STILL not reaching
+ * the specified hue.
+ *
+ * gpt-image-1 is what ChatGPT uses, and it applies ColorPlus colours correctly.
+ * It re-renders rather than edits, so the result is an interpretation of the
+ * house rather than a survey of it — which is the trade the reference workflow
+ * already makes.
  */
-const MODEL = "black-forest-labs/flux-dev" as `${string}/${string}`;
-
-/** Low enough to hold windows, roofline and massing; high enough to re-clad. */
-const PROMPT_STRENGTH = 0.4;
 
 export class RenderNotConfiguredError extends Error {
   constructor() {
-    super("REPLICATE_API_TOKEN is not set on this deployment.");
+    super("OPENAI_API_KEY is not set on this deployment.");
     this.name = "RenderNotConfiguredError";
   }
 }
@@ -25,7 +28,7 @@ export class RenderNotConfiguredError extends Error {
 export class RenderBillingError extends Error {
   constructor() {
     super(
-      "Your Replicate account has no credit, so the render could not run. Add credit at replicate.com/account/billing.",
+      "The image account has no credit, so the render could not run. Check billing on the provider account.",
     );
     this.name = "RenderBillingError";
   }
@@ -49,81 +52,37 @@ export function buildRenderPrompt(plan: SidingPlan, palette: Palette): string {
   ].join(" ");
 }
 
-async function readOutput(output: unknown, depth = 0): Promise<Buffer> {
-  if (depth > 3) throw new Error("The render came back in a form we could not read.");
-
-  if (typeof output === "string") {
-    if (output.startsWith("data:")) {
-      return Buffer.from(output.slice(output.indexOf(",") + 1), "base64");
-    }
-    const response = await fetch(output);
-    if (!response.ok) throw new Error(`Could not download the render (${response.status}).`);
-    return Buffer.from(await response.arrayBuffer());
-  }
-
-  if (Array.isArray(output)) {
-    if (output.length === 0) throw new Error("The model returned no image.");
-    return readOutput(output[0], depth + 1);
-  }
-
-  if (output && typeof output === "object") {
-    const candidate = output as {
-      blob?: () => Promise<Blob>;
-      url?: (() => URL | string) | string;
-      getReader?: unknown;
-      output?: unknown;
-    };
-    if (typeof candidate.blob === "function") {
-      const blob = await candidate.blob();
-      return Buffer.from(await blob.arrayBuffer());
-    }
-    if (typeof candidate.url === "function") {
-      const url = candidate.url();
-      return readOutput(typeof url === "string" ? url : url.toString(), depth + 1);
-    }
-    if (typeof candidate.url === "string") return readOutput(candidate.url, depth + 1);
-    if (typeof candidate.getReader === "function") {
-      const reader = (output as ReadableStream<Uint8Array>).getReader();
-      const chunks: Uint8Array[] = [];
-      for (;;) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        if (value) chunks.push(value);
-      }
-      return Buffer.concat(chunks);
-    }
-    if (candidate.output !== undefined) return readOutput(candidate.output, depth + 1);
-  }
-
-  throw new Error(`The model returned ${typeof output}.`);
-}
-
 export async function renderSiding(
   imagePng: Buffer,
   prompt: string,
-  strength: number = PROMPT_STRENGTH,
+  size: "1024x1024" | "1536x1024" | "1024x1536",
 ): Promise<Buffer> {
-  const token = process.env.REPLICATE_API_TOKEN;
-  if (!token) throw new RenderNotConfiguredError();
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) throw new RenderNotConfiguredError();
 
-  const replicate = new Replicate({ auth: token });
+  const openai = new OpenAI({ apiKey });
 
   try {
-    const output = await replicate.run(MODEL, {
-      input: {
-        prompt,
-        image: `data:image/png;base64,${imagePng.toString("base64")}`,
-        // The whole point: low denoising keeps geometry, windows and roof.
-        prompt_strength: strength,
-        guidance: 3.5,
-        num_inference_steps: 40,
-        output_format: "png",
-        output_quality: 100,
-        megapixels: "1",
-        disable_safety_checker: false,
-      },
+    const imageFile = await toFile(
+      new Blob([new Uint8Array(imagePng)], { type: "image/png" }),
+      "house.png",
+      { type: "image/png" },
+    );
+
+    // No mask: the whole photo is the reference, exactly as it is when the same
+    // image is handed to a chat model directly.
+    const response = await openai.images.edit({
+      model: "gpt-image-1",
+      image: imageFile,
+      prompt,
+      n: 1,
+      size,
+      quality: "high",
     });
-    return readOutput(output);
+
+    const b64 = response.data?.[0]?.b64_json;
+    if (!b64) throw new Error("The model returned no image.");
+    return Buffer.from(b64, "base64");
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     if (message.includes("402") || message.toLowerCase().includes("insufficient credit")) {

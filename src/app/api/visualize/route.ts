@@ -15,7 +15,15 @@ export const maxDuration = 300;
 const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 
 /** Longest edge the model works at comfortably, with aspect ratio preserved. */
-const MAX_EDGE = 1280;
+const MAX_EDGE = 1536;
+
+/** gpt-image-1 renders at one of three shapes; pick the one matching the photo. */
+function outputSizeFor(width: number, height: number): "1024x1024" | "1536x1024" | "1024x1536" {
+  const ratio = width / height;
+  if (ratio >= 1.2) return "1536x1024";
+  if (ratio <= 0.83) return "1024x1536";
+  return "1024x1024";
+}
 
 /** Lets the client detect that it is running a stale bundle. */
 export async function GET() {
@@ -29,12 +37,16 @@ export async function GET() {
  * Normalizes the upload without cropping — the model receives the whole
  * elevation, at its own aspect ratio.
  */
-async function prepareImage(buffer: Buffer): Promise<Buffer> {
-  return sharp(buffer)
+async function prepareImage(
+  buffer: Buffer,
+): Promise<{ png: Buffer; size: "1024x1024" | "1536x1024" | "1024x1536" }> {
+  const png = await sharp(buffer)
     .rotate() // honour EXIF orientation
     .resize(MAX_EDGE, MAX_EDGE, { fit: "inside", withoutEnlargement: true })
     .png()
     .toBuffer();
+  const meta = await sharp(png).metadata();
+  return { png, size: outputSizeFor(meta.width ?? 1024, meta.height ?? 1024) };
 }
 
 export async function POST(request: NextRequest) {
@@ -85,17 +97,7 @@ export async function POST(request: NextRequest) {
   try {
     const prepared = await prepareImage(Buffer.from(await upload.arrayBuffer()));
     const prompt = buildRenderPrompt(plan, palette);
-    // Calibration hook: the strength that moves colour without losing geometry
-    // is empirical, so allow overriding it while it is being dialled in.
-    const strengthParam = Number.parseFloat(
-      request.nextUrl.searchParams.get("strength") ?? "",
-    );
-    const strength =
-      Number.isFinite(strengthParam) && strengthParam > 0 && strengthParam < 1
-        ? strengthParam
-        : undefined;
-
-    const rendered = await renderSiding(prepared, prompt, strength);
+    const rendered = await renderSiding(prepared.png, prompt, prepared.size);
 
     const debug = request.nextUrl.searchParams.get("debug") === "1";
 
