@@ -11,7 +11,7 @@ import { BUILD_ID } from "@/lib/buildId";
 import { buildPlan } from "@/lib/engine";
 import { ImageDecodeError, downscaleImage, formatBytes } from "@/lib/downscale";
 import { decodePlan } from "@/lib/share";
-import { ELEVATION_OPTIONS } from "@/lib/render";
+import { ELEVATION_OPTIONS, KEEP_DOOR_ID } from "@/lib/render";
 import type { Palette } from "@/types/quiz";
 
 type Stage = "setup" | "working" | "done";
@@ -405,10 +405,12 @@ export function Visualizer() {
               <>
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border border-stone-300 bg-white p-4">
                   <p className="text-[12px] leading-snug text-slateCharcoal-muted">
-                    <span className="font-bold text-slateCharcoal">{palette.name}</span> — siding
-                    field repainted in {palette.body.color.name}. Trim and door are shown as they
-                    are today; your plan specifies {palette.trim.color.name} trim and{" "}
-                    {palette.accent.color.name} on the front door.
+                    <span className="font-bold text-slateCharcoal">{palette.name}</span> —{" "}
+                    {palette.body.color.name} body, {palette.trim.color.name} trim
+                    {options.includes(KEEP_DOOR_ID)
+                      ? ", existing front door kept"
+                      : `, ${palette.accent.color.name} front door`}
+                    .
                   </p>
                   <a
                     href={result}

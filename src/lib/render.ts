@@ -47,7 +47,21 @@ export interface ElevationOption {
   clause: (palette: Palette) => string;
 }
 
+/**
+ * Handled specially: this REPLACES the door instruction in the base prompt
+ * rather than appending to it, so it must not also be emitted as an extra
+ * clause — the render would otherwise be told both to repaint and to preserve.
+ */
+export const KEEP_DOOR_ID = "keep-door";
+
 export const ELEVATION_OPTIONS: readonly ElevationOption[] = [
+  {
+    id: KEEP_DOOR_ID,
+    label: "Keep my front door",
+    hint: "Existing colour, style and hardware",
+    clause: () =>
+      "Keep the existing front door exactly as it is — same colour, same panel style, same hardware, same sidelights. Do not repaint or replace it.",
+  },
   {
     id: "remove-shutters",
     label: "Remove shutters",
@@ -101,9 +115,15 @@ export function buildRenderPrompt(
   const trim = palette.trim.color;
   const accent = palette.accent.color;
 
-  const extras = ELEVATION_OPTIONS.filter((option) => optionIds.includes(option.id)).map((option) =>
-    option.clause(palette),
-  );
+  const keepDoor = optionIds.includes(KEEP_DOOR_ID);
+
+  const extras = ELEVATION_OPTIONS.filter(
+    (option) => optionIds.includes(option.id) && option.id !== KEEP_DOOR_ID,
+  ).map((option) => option.clause(palette));
+
+  const doorClause = keepDoor
+    ? "Keep the existing front door exactly as it is — same colour, same panel style, same hardware, same sidelights. Do not repaint or replace it."
+    : `Paint the front door ${accent.name} (${accent.hex}).`;
 
   return [
     "Architectural exterior redesign of this specific home.",
@@ -112,7 +132,7 @@ export function buildRenderPrompt(
     "Keep all architectural elements, roofline, roof shingles, window positions, window frames,",
     "and landscaping exactly as shown.",
     `Apply ${trim.name} (${trim.hex}) to all corner boards, fascia, and window trims.`,
-    `Paint the front door ${accent.name} (${accent.hex}).`,
+    doorClause,
     ...extras,
     "Photorealistic architectural photography, sharp daylight.",
   ].join(" ");
