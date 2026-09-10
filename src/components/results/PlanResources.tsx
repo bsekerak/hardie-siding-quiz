@@ -1,4 +1,5 @@
 import { SectionHeading } from "@/components/results/SectionHeading";
+import Link from "next/link";
 import { ArrowOut } from "@/components/ui/ArrowOut";
 import { Icon } from "@/components/ui/Icon";
 import type { QuizAnswers, SidingPlan } from "@/types/quiz";
@@ -13,16 +14,14 @@ interface ResourceLink {
   title: string;
   body: string;
   icon: string;
-  featured?: boolean;
 }
 
 const CORE_LINKS: readonly ResourceLink[] = [
   {
     href: "https://www.jameshardie.com/hardie-designer/",
-    title: "See it on your own house",
-    body: "Hardie™ Designer lets you upload a photo of your home and apply your actual siding profile and ColorPlus® color to it. Do this before you order samples — it eliminates the colors you thought you wanted in about five minutes.",
+    title: "Try Hardie™ Designer",
+    body: "James Hardie's own visualizer, as a second opinion on colour. Worth a look alongside your render above.",
     icon: "Palette",
-    featured: true,
   },
   {
     href: "https://www.jameshardie.com/statement-collection-colors/",
@@ -96,8 +95,6 @@ interface PlanResourcesProps {
 }
 
 export function PlanResources({ plan, answers }: PlanResourcesProps) {
-  const featured = CORE_LINKS.find((link) => link.featured);
-  const rest = CORE_LINKS.filter((link) => !link.featured);
 
   const conditional: ResourceLink[] = [];
   if (answers.installer === "diy") {
@@ -118,32 +115,34 @@ export function PlanResources({ plan, answers }: PlanResourcesProps) {
         description="In that order. Homeowners who visualize and sample before they call a contractor make faster decisions and change their minds less often mid-project."
       />
 
-      {featured ? (
-        <a
-          href={featured.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group mb-3 block bg-hardie-800 px-6 py-9 text-white sm:px-8"
-        >
-          <span className="flex items-start justify-between gap-6">
-            <span className="max-w-2xl">
-              <span className="block text-24p font-black tracking-tight group-hover:underline sm:text-28p">
-                {featured.title}
-              </span>
-              <span className="mt-3 block text-[14px] leading-relaxed text-stone-200">
-                {featured.body}
-              </span>
-              <span className="mt-5 inline-block border border-gold px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-gold">
-                Start with {plan.palettes[0]?.body.color.name ?? "your palette"}
-              </span>
+      <Link
+        href="/visualizer"
+        className="group mb-3 block bg-hardie-800 px-6 py-9 text-white transition-colors hover:bg-hardie-900 sm:px-8"
+      >
+        <span className="flex items-start justify-between gap-6">
+          <span className="max-w-2xl">
+            <span className="block text-24p font-black tracking-tight group-hover:underline sm:text-28p">
+              See it on your own house
             </span>
-            <ArrowOut className="h-6 w-6 shrink-0 text-white" />
+            <span className="mt-3 block text-[14px] leading-relaxed text-stone-200">
+              Upload a photo and we&apos;ll re-clad it in {plan.palettes[0]?.body.color.name ?? "your palette"} with{" "}
+              {plan.palettes[0]?.trim.color.name ?? "matching"} trim. Switch between your three palette
+              tiers, drop the shutters or gable vents, and try board-and-batten gables — all on your
+              actual elevation. Do this before you order samples; it rules out the colours you
+              thought you wanted in about five minutes.
+            </span>
+            <span className="mt-5 inline-block border border-gold px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-gold">
+              Start with {plan.palettes[0]?.body.color.name ?? "your palette"}
+            </span>
           </span>
-        </a>
-      ) : null}
+          <span aria-hidden="true" className="mt-1 text-2xl leading-none">
+            &rarr;
+          </span>
+        </span>
+      </Link>
 
       <div className="grid gap-px bg-stone-300 sm:grid-cols-2">
-        {[...rest, ...conditional].map((link) => (
+        {[...CORE_LINKS, ...conditional].map((link) => (
           <ResourceCard key={link.href} link={link} />
         ))}
       </div>

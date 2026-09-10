@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { SavePlanModal } from "@/components/results/SavePlanModal";
 import { Button } from "@/components/ui/Button";
@@ -69,24 +68,6 @@ export function PlanActions({ plan, answers, paletteIndex }: PlanActionsProps) {
         The plan above is only worth what you do with it. Order samples before you commit to a
         color, and send the same written scope to every contractor you talk to.
       </p>
-
-      <Link
-        href="/visualizer"
-        className="group mb-4 flex items-start justify-between gap-6 bg-hardie-800 px-6 py-7 text-white transition-colors hover:bg-hardie-900 sm:px-8"
-      >
-        <span className="max-w-xl">
-          <span className="block text-24p font-black tracking-tight group-hover:underline">
-            See it on your own house
-          </span>
-          <span className="mt-2 block text-[13px] leading-relaxed text-stone-200">
-            Upload a photo and we&apos;ll repaint the siding in your ColorPlus® colour. Your
-            windows, roof and landscaping stay exactly as photographed.
-          </span>
-        </span>
-        <span aria-hidden="true" className="mt-1 text-2xl leading-none">
-          &rarr;
-        </span>
-      </Link>
 
       <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <button
