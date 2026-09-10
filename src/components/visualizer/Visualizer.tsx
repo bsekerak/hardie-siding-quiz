@@ -176,7 +176,7 @@ export function Visualizer() {
   const run = async (): Promise<void> => {
     setError(null);
     setStage("working");
-    setBusyLabel("Repainting your siding…");
+    setBusyLabel("Re-cladding your house…");
 
     const body = new FormData();
     body.set("plan", JSON.stringify(plan));
@@ -245,9 +245,9 @@ export function Visualizer() {
             See your plan on your own house
           </h1>
           <p className="mt-2.5 max-w-2xl text-[15px] leading-relaxed text-slateCharcoal-muted">
-            Upload a photo of your home and we&apos;ll repaint the siding in your selected
-            ColorPlus® colour. Your windows, roof, trim, landscaping and everything else stay
-            exactly as photographed — nothing is generated, so nothing can be invented.
+            Upload a photo of your home and we&apos;ll re-clad it in your selected ColorPlus®
+            palette — body, trim and front door — while holding the roofline, window positions and
+            landscaping of your actual house.
           </p>
         </header>
 
@@ -371,11 +371,11 @@ export function Visualizer() {
 
             <div className="mt-5 border-l-[3px] border-stone-400 bg-stone-100 p-4">
               <p className="text-[12px] leading-relaxed text-slateCharcoal-muted">
-                The siding is recoloured from your own photograph, so the result carries your real
-                shadows and texture rather than a generated impression. Colour still shifts with
-                lighting and screen calibration — confirm against a physical ColorPlus® sample on
-                the actual wall before ordering. Your photo is sent to Replicate to detect the wall
-                area and is not stored by this tool.
+                This is an AI rendering of your photo, not a photograph of a finished job — read it
+                as a design impression rather than a survey. Colour also shifts with lighting and
+                screen calibration, so confirm against a physical ColorPlus® sample on the actual
+                wall before ordering. Your photo is sent to Replicate to produce the render and is
+                not stored by this tool.
               </p>
             </div>
           </div>
