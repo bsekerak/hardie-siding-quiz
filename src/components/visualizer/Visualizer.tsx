@@ -11,7 +11,7 @@ import { BUILD_ID } from "@/lib/buildId";
 import { buildPlan } from "@/lib/engine";
 import { ImageDecodeError, downscaleImage, formatBytes } from "@/lib/downscale";
 import { decodePlan } from "@/lib/share";
-import { ELEVATION_OPTIONS, KEEP_DOOR_ID } from "@/lib/render";
+import { ELEVATION_OPTIONS, PAINT_DOOR_ID } from "@/lib/render";
 import type { Palette } from "@/types/quiz";
 
 type Stage = "setup" | "working" | "done";
@@ -249,8 +249,8 @@ export function Visualizer() {
           </h1>
           <p className="mt-2.5 max-w-2xl text-[15px] leading-relaxed text-slateCharcoal-muted">
             Upload a photo of your home and we&apos;ll re-clad it in your selected ColorPlus®
-            palette — body, trim and front door — while holding the roofline, window positions and
-            landscaping of your actual house.
+            palette — body and trim — while holding the roofline, window positions, doors and
+            landscaping of your actual house. Works on any elevation, front or back.
           </p>
         </header>
 
@@ -407,9 +407,9 @@ export function Visualizer() {
                   <p className="text-[12px] leading-snug text-slateCharcoal-muted">
                     <span className="font-bold text-slateCharcoal">{palette.name}</span> —{" "}
                     {palette.body.color.name} body, {palette.trim.color.name} trim
-                    {options.includes(KEEP_DOOR_ID)
-                      ? ", existing front door kept"
-                      : `, ${palette.accent.color.name} front door`}
+                    {options.includes(PAINT_DOOR_ID)
+                      ? `, ${palette.accent.color.name} front door`
+                      : ", doors left as photographed"}
                     .
                   </p>
                   <a

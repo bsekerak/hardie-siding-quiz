@@ -48,19 +48,20 @@ export interface ElevationOption {
 }
 
 /**
- * Handled specially: this REPLACES the door instruction in the base prompt
- * rather than appending to it, so it must not also be emitted as an extra
- * clause — the render would otherwise be told both to repaint and to preserve.
+ * Painting the door is now OPT-IN. Instructing it by default made the model
+ * render a door on elevations that have none — a rear or side wall would come
+ * back with an entry the homeowner does not own. The tool's job is siding, so
+ * the door is left alone unless it is asked for.
  */
-export const KEEP_DOOR_ID = "keep-door";
+export const PAINT_DOOR_ID = "paint-door";
 
 export const ELEVATION_OPTIONS: readonly ElevationOption[] = [
   {
-    id: KEEP_DOOR_ID,
-    label: "Keep my front door",
-    hint: "Existing colour, style and hardware",
-    clause: () =>
-      "Keep the existing front door exactly as it is — same colour, same panel style, same hardware, same sidelights. Do not repaint or replace it.",
+    id: PAINT_DOOR_ID,
+    label: "Paint the front door",
+    hint: "Only if this elevation has one",
+    clause: (palette) =>
+      `If — and only if — a front door is already visible in this photograph, paint that existing door ${palette.accent.color.name} (${palette.accent.color.hex}). Do not add a door, and do not change its size, position, panel style or hardware.`,
   },
   {
     id: "remove-shutters",
@@ -113,19 +114,16 @@ export function buildRenderPrompt(
   const { spec } = plan;
   const body = palette.body.color;
   const trim = palette.trim.color;
-  const accent = palette.accent.color;
 
-  const keepDoor = optionIds.includes(KEEP_DOOR_ID);
+  const extras = ELEVATION_OPTIONS.filter((option) => optionIds.includes(option.id)).map((option) =>
+    option.clause(palette),
+  );
 
-  const extras = ELEVATION_OPTIONS.filter(
-    (option) => optionIds.includes(option.id) && option.id !== KEEP_DOOR_ID,
-  ).map((option) => option.clause(palette));
-
-  // Conditional by design. An unconditional "paint the front door" instruction
-  // makes the model invent one on a rear or side elevation that has none.
-  const doorClause = keepDoor
-    ? "If a front door is visible, keep it exactly as it is — same colour, same panel style, same hardware, same sidelights. Do not repaint or replace it."
-    : `If a front door is visible in this photograph, paint it ${accent.name} (${accent.hex}). If no door is visible, leave the wall unbroken.`;
+  // No door instruction at all unless it was asked for. Naming the door in any
+  // form — even conditionally — is enough to make the model produce one.
+  const doorClause = optionIds.includes(PAINT_DOOR_ID)
+    ? ""
+    : "Leave every door exactly as photographed, in its existing colour and style.";
 
   return [
     "Architectural exterior redesign of this specific home.",
@@ -134,12 +132,12 @@ export function buildRenderPrompt(
     "Keep all architectural elements, roofline, roof shingles, window positions, window frames,",
     "and landscaping exactly as shown.",
     `Apply ${trim.name} (${trim.hex}) to all corner boards, fascia, and window trims.`,
-    doorClause,
+    ...(doorClause ? [doorClause] : []),
     ...extras,
     // Guard against invention generally, not just doors: rear elevations lose
     // entries, side elevations lose windows, and the model will helpfully
     // supply whatever it thinks a house ought to have.
-    "Apart from the changes described above, do not add or invent any architectural element that is not already visible in this photograph — no new doors, windows, dormers, gables, porches, columns, chimneys or vents. Match the existing elevation exactly, including blank walls.",
+    "CRITICAL: Do not add, remove, move, resize or restyle any door or window. If this elevation has no door, render an unbroken wall — do not place a door anywhere. Apart from the changes described above, invent no architectural element that is not already visible in this photograph: no dormers, gables, porches, decks, columns, chimneys, vents or light fixtures. Match the existing elevation exactly, including blank walls.",
     "Photorealistic architectural photography, sharp daylight.",
   ].join(" ");
 }
