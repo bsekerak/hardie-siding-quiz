@@ -98,7 +98,11 @@ async function readOutput(output: unknown, depth = 0): Promise<Buffer> {
   throw new Error(`The model returned ${typeof output}.`);
 }
 
-export async function renderSiding(imagePng: Buffer, prompt: string): Promise<Buffer> {
+export async function renderSiding(
+  imagePng: Buffer,
+  prompt: string,
+  strength: number = PROMPT_STRENGTH,
+): Promise<Buffer> {
   const token = process.env.REPLICATE_API_TOKEN;
   if (!token) throw new RenderNotConfiguredError();
 
@@ -110,7 +114,7 @@ export async function renderSiding(imagePng: Buffer, prompt: string): Promise<Bu
         prompt,
         image: `data:image/png;base64,${imagePng.toString("base64")}`,
         // The whole point: low denoising keeps geometry, windows and roof.
-        prompt_strength: PROMPT_STRENGTH,
+        prompt_strength: strength,
         guidance: 3.5,
         num_inference_steps: 40,
         output_format: "png",

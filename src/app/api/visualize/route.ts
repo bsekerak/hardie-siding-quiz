@@ -85,7 +85,17 @@ export async function POST(request: NextRequest) {
   try {
     const prepared = await prepareImage(Buffer.from(await upload.arrayBuffer()));
     const prompt = buildRenderPrompt(plan, palette);
-    const rendered = await renderSiding(prepared, prompt);
+    // Calibration hook: the strength that moves colour without losing geometry
+    // is empirical, so allow overriding it while it is being dialled in.
+    const strengthParam = Number.parseFloat(
+      request.nextUrl.searchParams.get("strength") ?? "",
+    );
+    const strength =
+      Number.isFinite(strengthParam) && strengthParam > 0 && strengthParam < 1
+        ? strengthParam
+        : undefined;
+
+    const rendered = await renderSiding(prepared, prompt, strength);
 
     const debug = request.nextUrl.searchParams.get("debug") === "1";
 
