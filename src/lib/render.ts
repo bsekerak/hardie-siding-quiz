@@ -34,11 +34,76 @@ export class RenderBillingError extends Error {
   }
 }
 
-export function buildRenderPrompt(plan: SidingPlan, palette: Palette): string {
+/**
+ * Optional elevation edits. These are cheap now: the render is a text-prompted
+ * generation from the original photo, so each one is a clause rather than a
+ * mask. Because every render starts from the untouched photo, options compose
+ * without drift compounding across selections.
+ */
+export interface ElevationOption {
+  id: string;
+  label: string;
+  hint: string;
+  clause: (palette: Palette) => string;
+}
+
+export const ELEVATION_OPTIONS: readonly ElevationOption[] = [
+  {
+    id: "remove-shutters",
+    label: "Remove shutters",
+    hint: "Clean wall around every window",
+    clause: () =>
+      "Remove all window shutters entirely, leaving clean uninterrupted siding around each window.",
+  },
+  {
+    id: "remove-gable-vents",
+    label: "Remove gable vents",
+    hint: "Continuous siding across the gable",
+    clause: () =>
+      "Remove the louvered gable vents and any attic vents, leaving continuous unbroken siding across the gable faces.",
+  },
+  {
+    id: "batten-gables",
+    label: "Board & batten gables",
+    hint: "Vertical boards in the trim colour",
+    clause: (palette) =>
+      `Clad the gable faces above the main roofline in vertical board-and-batten siding finished in ${palette.trim.color.name} (${palette.trim.color.hex}), meeting the horizontal lap siding below at a crisp horizontal break.`,
+  },
+  {
+    id: "shingle-gables",
+    label: "Shingle gables",
+    hint: "Staggered shake in the body colour",
+    clause: (palette) =>
+      `Clad the gable faces above the main roofline in staggered-edge shingle siding finished in ${palette.body.color.name} (${palette.body.color.hex}).`,
+  },
+  {
+    id: "black-windows",
+    label: "Black window frames",
+    hint: "Matte black sashes and frames",
+    clause: () => "Change all window frames and sashes to a matte black finish.",
+  },
+  {
+    id: "accent-shutters",
+    label: "Add accent shutters",
+    hint: "Shutters in your accent colour",
+    clause: (palette) =>
+      `Add shutters flanking the front-facing windows finished in ${palette.accent.color.name} (${palette.accent.color.hex}), sized to roughly half the window width.`,
+  },
+];
+
+export function buildRenderPrompt(
+  plan: SidingPlan,
+  palette: Palette,
+  optionIds: readonly string[] = [],
+): string {
   const { spec } = plan;
   const body = palette.body.color;
   const trim = palette.trim.color;
   const accent = palette.accent.color;
+
+  const extras = ELEVATION_OPTIONS.filter((option) => optionIds.includes(option.id)).map((option) =>
+    option.clause(palette),
+  );
 
   return [
     "Architectural exterior redesign of this specific home.",
@@ -48,6 +113,7 @@ export function buildRenderPrompt(plan: SidingPlan, palette: Palette): string {
     "and landscaping exactly as shown.",
     `Apply ${trim.name} (${trim.hex}) to all corner boards, fascia, and window trims.`,
     `Paint the front door ${accent.name} (${accent.hex}).`,
+    ...extras,
     "Photorealistic architectural photography, sharp daylight.",
   ].join(" ");
 }

@@ -96,7 +96,11 @@ export async function POST(request: NextRequest) {
 
   try {
     const prepared = await prepareImage(Buffer.from(await upload.arrayBuffer()));
-    const prompt = buildRenderPrompt(plan, palette);
+    const optionIds = String(formData.get("options") ?? "")
+      .split(",")
+      .map((id) => id.trim())
+      .filter(Boolean);
+    const prompt = buildRenderPrompt(plan, palette, optionIds);
     const rendered = await renderSiding(prepared.png, prompt, prepared.size);
 
     const debug = request.nextUrl.searchParams.get("debug") === "1";

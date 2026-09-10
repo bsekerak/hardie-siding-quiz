@@ -11,6 +11,7 @@ import { BUILD_ID } from "@/lib/buildId";
 import { buildPlan } from "@/lib/engine";
 import { ImageDecodeError, downscaleImage, formatBytes } from "@/lib/downscale";
 import { decodePlan } from "@/lib/share";
+import { ELEVATION_OPTIONS } from "@/lib/render";
 import type { Palette } from "@/types/quiz";
 
 type Stage = "setup" | "working" | "done";
@@ -92,6 +93,7 @@ export function Visualizer() {
   const [error, setError] = useState<string | null>(null);
   const [busyLabel, setBusyLabel] = useState<string>("");
   const [stale, setStale] = useState<boolean>(false);
+  const [options, setOptions] = useState<readonly string[]>([]);
   const fileInput = useRef<HTMLInputElement>(null);
 
   // A browser holding a cached bundle silently runs old code — including old
@@ -188,6 +190,7 @@ export function Visualizer() {
       return;
     }
     body.set("image", photo);
+    if (options.length > 0) body.set("options", options.join(","));
 
     try {
       const response = await fetch("/api/visualize", { method: "POST", body });
@@ -270,7 +273,58 @@ export function Visualizer() {
             </section>
 
             <section>
-              <p className="spec-label mb-3">2 — Your house photo</p>
+              <p className="spec-label mb-3">2 — Elevation changes (optional)</p>
+              <div className="grid gap-px bg-stone-300">
+                {ELEVATION_OPTIONS.map((option) => {
+                  const active = options.includes(option.id);
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      role="checkbox"
+                      aria-checked={active}
+                      onClick={() =>
+                        setOptions((current) =>
+                          current.includes(option.id)
+                            ? current.filter((id) => id !== option.id)
+                            : [...current, option.id],
+                        )
+                      }
+                      className={cn(
+                        "flex items-start gap-3 p-3.5 text-left transition-colors",
+                        active ? "bg-hardie-50" : "bg-white hover:bg-stone-100",
+                      )}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={cn(
+                          "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center border-2 transition-colors",
+                          active ? "border-hardie-500 bg-hardie-500 text-white" : "border-stone-400",
+                        )}
+                      >
+                        {active ? <Icon name="Check" className="h-2.5 w-2.5" strokeWidth={4} /> : null}
+                      </span>
+                      <span>
+                        <span
+                          className={cn(
+                            "block text-[13px] font-bold tracking-tight",
+                            active ? "text-hardie-700" : "text-slateCharcoal",
+                          )}
+                        >
+                          {option.label}
+                        </span>
+                        <span className="block text-[11px] leading-snug text-slateCharcoal-muted">
+                          {option.hint}
+                        </span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            <section>
+              <p className="spec-label mb-3">3 — Your house photo</p>
               <input
                 ref={fileInput}
                 type="file"
