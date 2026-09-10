@@ -121,9 +121,11 @@ export function buildRenderPrompt(
     (option) => optionIds.includes(option.id) && option.id !== KEEP_DOOR_ID,
   ).map((option) => option.clause(palette));
 
+  // Conditional by design. An unconditional "paint the front door" instruction
+  // makes the model invent one on a rear or side elevation that has none.
   const doorClause = keepDoor
-    ? "Keep the existing front door exactly as it is — same colour, same panel style, same hardware, same sidelights. Do not repaint or replace it."
-    : `Paint the front door ${accent.name} (${accent.hex}).`;
+    ? "If a front door is visible, keep it exactly as it is — same colour, same panel style, same hardware, same sidelights. Do not repaint or replace it."
+    : `If a front door is visible in this photograph, paint it ${accent.name} (${accent.hex}). If no door is visible, leave the wall unbroken.`;
 
   return [
     "Architectural exterior redesign of this specific home.",
@@ -134,6 +136,10 @@ export function buildRenderPrompt(
     `Apply ${trim.name} (${trim.hex}) to all corner boards, fascia, and window trims.`,
     doorClause,
     ...extras,
+    // Guard against invention generally, not just doors: rear elevations lose
+    // entries, side elevations lose windows, and the model will helpfully
+    // supply whatever it thinks a house ought to have.
+    "Apart from the changes described above, do not add or invent any architectural element that is not already visible in this photograph — no new doors, windows, dormers, gables, porches, columns, chimneys or vents. Match the existing elevation exactly, including blank walls.",
     "Photorealistic architectural photography, sharp daylight.",
   ].join(" ");
 }
