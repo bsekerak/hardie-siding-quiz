@@ -26,9 +26,15 @@ const CANDIDATES: ReadonlyArray<{
     name: "grounded_sam",
     build: (image) => ({
       image,
-      mask_prompt: "house siding, exterior wall cladding",
-      negative_mask_prompt: "window, door, roof, sky, tree, grass, driveway, shrub",
-      adjustment_factor: 0,
+      mask_prompt: "horizontal lap siding boards on the wall of the house",
+      negative_mask_prompt:
+        "roof, roof shingles, gutter, downspout, soffit, fascia, window, window frame, " +
+        "window trim, shutters, door, garage door, porch, column, railing, chimney, sky, " +
+        "tree, bush, shrub, grass, lawn, mulch, stone, walkway, driveway, car",
+      // Negative erodes the mask, pulling it back from rooflines and casing
+      // where the boundary is fuzzy. Over-inclusion is far more visible than
+      // leaving a thin strip of original siding at an edge.
+      adjustment_factor: -18,
     }),
   },
   {

@@ -39,8 +39,11 @@ export async function recolorSiding(
   const out = Buffer.allocUnsafe(data.length);
   for (let i = 0, p = 0; i < compositeAlpha.length; i += 1, p += 3) {
     const l = luminance(data[p] ?? 0, data[p + 1] ?? 0, data[p + 2] ?? 0);
-    // Compress the ratio a little so deep shadows do not crush to black.
-    const ratio = Math.min(1.7, Math.max(0.35, 0.25 + 0.75 * (l / (meanL || 1))));
+    // Keep every pixel close to the target. The previous window (0.35-1.7) blew
+    // out on a light-coloured house: most pixels sat above the mean, got scaled
+    // up, and Mountain Sage arrived as pale mint. Deviation is now capped at
+    // +/-30%, which is enough to read board shadows without losing the hue.
+    const ratio = Math.min(1.3, Math.max(0.7, 0.35 + 0.65 * (l / (meanL || 1))));
     out[p] = Math.min(255, Math.round(tr * ratio));
     out[p + 1] = Math.min(255, Math.round(tg * ratio));
     out[p + 2] = Math.min(255, Math.round(tb * ratio));
